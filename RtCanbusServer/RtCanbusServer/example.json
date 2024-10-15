@@ -1,0 +1,23 @@
+[
+    {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "method": "device.track.ComboActionStart",
+		"params": {
+			"api": "Reset",
+			"func_id": 800
+		}
+    },
+    {
+        "id": 1,
+        "result": true
+    },
+    {
+        "id": 2,
+        "jsonrpc": "2.0",
+        "method": "device.track.SensorCheckEnable",
+        "params": {
+            "enable": false
+        }
+    }
+]

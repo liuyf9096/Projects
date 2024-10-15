@@ -1,0 +1,57 @@
+<RCC>
+    <qresource prefix="/img">
+        <file>image/button/checkbox_checked.png</file>
+        <file>image/button/checkbox_unchecked.png</file>
+        <file>image/button/combox_ico_drop.png</file>
+        <file>image/button/connected.png</file>
+        <file>image/button/disconnected.png</file>
+        <file>image/button/radiobutton_checked.png</file>
+        <file>image/button/radiobutton_unchecked.png</file>
+        <file>image/button/reset_disable.png</file>
+        <file>image/button/reset_hover.png</file>
+        <file>image/button/reset_normal.png</file>
+        <file>image/button/reset_pressed.png</file>
+        <file>image/button/shanchu_hover.png</file>
+        <file>image/button/shanchu_normal.png</file>
+        <file>image/button/shanchu_pressed.png</file>
+        <file>image/button/slidebutton_checked.png</file>
+        <file>image/button/slidebutton_unchecked.png</file>
+    </qresource>
+    <qresource prefix="/logo">
+        <file>image/logo/reetoo.ico</file>
+        <file>image/logo/reetoobig.png</file>
+        <file>image/logo/reetoo_white.png</file>
+    </qresource>
+    <qresource prefix="/indicator">
+        <file>image/indicator/alarm.png</file>
+        <file>image/indicator/connected_1.png</file>
+        <file>image/indicator/disconnected_1.png</file>
+        <file>image/indicator/false.png</file>
+        <file>image/indicator/start.png</file>
+        <file>image/indicator/stop.png</file>
+        <file>image/indicator/true.png</file>
+        <file>image/indicator/unstart.png</file>
+    </qresource>
+    <qresource prefix="/process">
+        <file>image/process/alarm_0.png</file>
+        <file>image/process/alarm_1.png</file>
+        <file>image/process/pause_0.png</file>
+        <file>image/process/pause_1.png</file>
+        <file>image/process/pause_2.png</file>
+        <file>image/process/start_0.png</file>
+        <file>image/process/start_1.png</file>
+        <file>image/process/start_2.png</file>
+        <file>image/process/stop_0.png</file>
+        <file>image/process/stop_1.png</file>
+        <file>image/process/stop_2.png</file>
+        <file>image/process/tool_0.png</file>
+        <file>image/process/tool_1.png</file>
+        <file>image/process/tool_2.png</file>
+        <file>image/process/resume_0.png</file>
+        <file>image/process/resume_1.png</file>
+        <file>image/process/resume_2.png</file>
+        <file>image/process/reset_0.png</file>
+        <file>image/process/reset_1.png</file>
+        <file>image/process/reset_2.png</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,729 @@
+{
+	"id": 1,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.Process.Start",
+	"params": {
+		"process": "boot"
+	}
+}
+{
+	"id": 1,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.Process.Start",
+	"params": {
+		"process": "stainAging"
+	}
+}
+{
+	"id": 1,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.Process.Reset",
+	"params": {
+		"process": "stainAging"
+	}
+}
+{
+	"id": 1,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.Process.Stop",
+	"params": {
+		"process": "stainAging"
+	}
+}
+{
+	"id": 1,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.Process.Start",
+	"params": {
+		"process": "smearAging"
+	}
+}
+{
+	"id": 1,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.Process.Reset",
+	"params": {
+		"process": "smearAging"
+	}
+}
+{
+	"id": 1,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.Process.Stop",
+	"params": {
+		"process": "smearAging"
+	}
+}
+{
+	"jsonrpc": "2.0",
+	"method": "UI.StainAging.SuccessCount",
+	"params": {
+		"count": 0
+	}
+}
+
+{
+	"id": 2,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.AutoTest.Start"
+}
+{
+	"id": 2,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.Sleep.Start"
+}
+
+{
+	"id": 2,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.Sleep.Stop"
+}
+
+{
+	"id": 2,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.Config.Track",
+	"params": {
+		"waitTime":1
+	}
+}
+{
+	"id": 2,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.Config.AutoTest",
+	"params": {
+		"mode":{
+			"isPrint": true, 
+			"isSmear": true, 
+			"isStain": true 	
+		}
+	}
+}
+
+{
+	"jsonrpc": "2.0",
+	"method": "UI.Sample.SamplePrintInfo",
+	"params": {
+		"print": {
+			"code": "QRcode",
+			"line1": "2",
+			"line2": "2022-08-02",
+			"line3": "",
+			"sample_id": "2"
+		},
+		"sample_uid": "U152"
+	}
+}
+
+
+
+{
+	"id": 2,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.AutoTest.Stop"
+}
+
+{
+	"id": 2,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.Config.Emergency",
+	"params": {
+		"closeTime": 1 (s)
+	}
+}
+
+{
+	"id": 2,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.Config.RecycleBox",
+	"params": {
+		"countMax": 10
+	}
+}
+
+{
+	"id": 2,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.Config.StainProcess",
+	"params": {
+			"method": "Wright",
+			"period": 45,
+			"process": [
+				{
+					"duration": 45,
+					"pool": "fix", todo
+					"solution": "fix", obsolete todo
+				},
+				{
+					"duration": 45,
+					"pool": "c1",
+					"solution": "a",
+					"change":120
+				},
+				{
+					"duration": 45,
+					"pool": "c2",
+					"ratio": {
+						"a": 1,
+						"b": 5
+					},
+					"solution": "c2",
+				},
+				{
+					"count": 1,
+					"pool": "wash"
+				},
+				{
+					"duration": 45,
+					"pool": "dry"
+				}
+			],
+			"Ret":{
+				"hatchTime":20,
+				"ratio":{
+					"a":1,
+					"b":1
+				}
+			}
+		}
+	}
+}
+
+
+
+{
+	"jsonrpc": "2.0",
+	"method": "UI.Exception.Exception",
+	"params": {
+		"error_id": "TubeRemain_101",
+		"message": "Detect a tube remained inside, please remove it first.",
+		"error_level": "error/alarm"
+	}
+}
+
+{
+	"id": 55,
+	"jsonrpc": "2.0",
+	"method": "UI.Exception.ClearException",
+	"params": {
+		"error_id": "TubeRemain_101"
+	}
+}
+
+{
+	"jsonrpc": "2.0",
+	"method": "UI.Exception.SetException",
+	"params": {
+		"api": "NewRecycleBox",
+		"code": 80,
+		"device": "stain",
+		"error_id": "stain_NewRecycleBox_80",
+		"message": "Command Execute Fail."
+	}
+}
+
+
+{
+	"id": 2,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.StainOnly.Start",
+	"params": {
+		"stainBox": "left/right",
+		"slides": [
+			{
+				"pos": 0,
+				"sample_uid": "U232",
+				"slide_uid": "U232-1"
+			},
+			{
+				"pos": 1,
+				"sample_uid": "U232",
+				"slide_uid": "U232-1"
+			},
+			{
+				"pos": 2,
+				"sample_uid": "U232",
+				"slide_uid": "U232-1"
+			},
+			{
+				"pos": 3,
+				"sample_uid": "U232",
+				"slide_uid": "U232-1"
+			}
+		]
+	}
+}
+{
+	"id": 2,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.StainOnly.Stop"
+}
+
+{
+	"id": 2,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.PrintOnly.Start",
+	"params": {
+		"slides": [		
+			{
+				"sample_uid":"U12",
+				"slide_uid":"U12-1",
+				"print": {
+					"code": "QRcode",
+					"line1": "Rt112",
+					"line2": "date",
+					"line3": "",
+					"sample_id": "123"
+				}
+			},
+			{
+				"sample_uid":"U12",
+				"slide_uid":"U12-2",
+				"print": {
+					"code": "QRcode",
+					"line1": "Rt112",
+					"line2": "date",
+					"line3": "",
+					"sample_id": "Rt112"
+				}
+			}
+		]
+	}
+}
+
+{
+	"id": 2,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.PrintOnly.Stop"
+}
+
+{
+	"id": 2,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.Solution.Maintain",
+	"params": {
+		"method": "Liu",
+		"pools": [
+			{
+				"pool": "fix",
+				"expireTime": 24,
+				"expireCount": 24
+			},
+			{
+				"pool": "fix",
+				"expireTime": 24,
+				"expireCount": 24
+			},
+			{
+				"pool": "fix",
+				"expireTime": 24,
+				"expireCount": 24
+			},
+			{
+				"pool": "fix",
+				"expireTime": 24,
+				"expireCount": 24
+			}
+		]
+	}
+}
+
+
+{
+	"jsonrpc": "2.0",
+	"method": "UI.Rack.Sample",
+	"params": {
+		"rack_id": 0,
+		"rack_pos": 2,
+		"exist": true
+	}
+}
+
+{
+	"id": 1,
+	"jsonrpc": "2.0",
+	"method": "UI.Sample.GetSampleOrder",
+	"params": {
+		"barcode": "",
+		"sid": "S2",
+		"rack_id": 0,		/*试管架子id*/
+		"rack_pos": 2		/*试管posid*/
+	}
+}
+
+//getorder
+{
+	"id": 0,
+	"jsonrpc": "2.0",
+	"result": {
+		"emergency": false,
+		"hct": "",
+		"mode": {
+			"isPrint": true,
+			"isSmear": true,
+			"isStain": true
+		},
+		"sample_type": "WholeBlood",
+		"sid": "S1",
+		"smear": {
+			"bloodFilm": "mode1",
+			"count": 2,
+			"smearLever": 1
+		},
+		"sample_uid": "Rt112",
+		"slides": [
+			{
+				"sample_uid": "Rt112",
+				"slide_uid": "Rt112-1",
+				"print": {
+					"code": "QRcode",
+					"line1": "Rt112",
+					"line2": "date",
+					"line3": "",
+					"sample_id": "Rt112"
+				}
+			},	
+			{
+				"sample_uid": "Rt112",
+				"slide_uid": "Rt112-2",
+				"print": {
+					"code": "QRcode",
+					"line1": "Rt112",
+					"line2": "date",
+					"line3": "",
+					"sample_id": "Rt112"
+				}
+			}
+		],
+		"stain": {
+			"isRet": false
+		}
+	}
+}
+
+{
+	"id": 1,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.Slot.DrainFix1"
+}
+{
+	"id": 1,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.Slot.DrainFix2"
+}
+{
+	"id": 1,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.Slot.DrainAll"
+}
+{
+	"id": 1,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.Slot.CleanAll"
+	"params": {
+		"detergent": "water/alcohol"
+	}
+}
+
+
+
+{
+	"id": 1,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.Config.PrintInfo"
+	"params":
+	{
+		"print":{
+			"code":"none/barcode/QRcode",
+			"line1":"xxxx/date/sample_id",
+			"line2":"xxxx/time",
+			"line3":"xxxx"
+		}
+	}
+}
+
+{
+	"id": 1,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.RecycleBox.Eject"
+}
+
+{
+	"jsonrpc": "2.0",
+	"method": "UI.RecycleBox.Sample",
+	"params": {
+		"pos": 1,
+		"sample_id": "********"
+	}
+}
+
+{
+	"jsonrpc": "2.0",
+	"method": "UI.RecycleBox.Spare",
+	"params": {
+		"count": 10
+	}
+}
+
+{
+	"jsonrpc": "2.0",
+	"method": "UI.Consumable.Solution",
+	"params": {
+		"consume": 1,
+		"solution":""
+	}
+}
+
+{
+	"jsonrpc": "2.0",
+	"method": "UI.Consumable.RecycleBox",
+	"params": {
+		"count": 1
+	}
+}
+
+{
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.Version.GetVersion",
+}
+
+{
+    "jsonrpc": "2.0",
+    "method": "UI.Device.Error",
+    "params": {
+        "error_id": "lack_of_recycle_box",
+        "code": 0,
+        "message": "smear error, please reset device.",
+		"code_id":"..."
+    }
+}
+
+{
+    "jsonrpc": "2.0",
+    "method": "UI.Device.Alarm",
+    "params": {
+        "alarm_id": "lack_of_recycle_box",
+        "code": 0,
+        "message": "Lack of Recycle Box, please add New one."
+		"code_id":"..."
+    }
+}
+
+清除 推进试管架错误 报警
+{
+"id": 2,
+"jsonrpc": "2.0",
+"method": "MiddleCtrl.Exception.Clear",
+"params": {
+"error_id": "import_rack_fail"
+}
+}
+
+PumpOnOff   { pid:1, on:true } 泵  
+{
+	"jsonrpc": "2.0",
+	"method": "CanbusServer. （smear, sampling, stain） .PumpOnOff",
+	"params": {
+		 "pid":1, 
+		 "on":true
+	}
+}
+ValveOnOff  { vid:1, on:true } 阀
+{
+	"jsonrpc": "2.0",
+	"method": "CanbusServer. （smear, sampling, stain） .ValveOnOff",
+	"params": {
+		 "vid":1, 
+		 "on":true
+	}
+}
+
+{
+
+"jsonrpc": "2.0",
+"method": "Canbusserver.Print.PrinterReset",
+	
+}
+{
+
+"jsonrpc": "2.0",
+"method": "Canbusserver.Print.PrintModelSetting",
+"params": {
+		 "template":1 
+	}
+}
+
+{
+
+"jsonrpc": "2.0",
+"method": "Canbusserver.Print.PrintHeadSetting",
+"params": {
+		 "pos":0
+	}
+}
+
+打印灰度
+{
+
+"jsonrpc": "2.0",
+"method": "Canbusserver.Print.PrintGrayLevelSetting",
+"params": {
+		 "level":0
+	}
+}
+
+碳带回收步距设置
+{
+
+"jsonrpc": "2.0",
+"method": "Canbusserver.Print.PrintRecycleSetting",
+"params": {
+		 "step":100
+	}
+}
+
+打印角度设置（0:0度， 1:90度， 2:100度）
+{
+
+"jsonrpc": "2.0",
+"method": "Canbusserver.Print.PrintAngleSetting",
+"params": {
+		 "angle":0
+	}
+}
+
+{
+    "id": 1,
+    "jsonrpc": "2.0",
+    "method": "MiddleCtrl.Emergency.Start",
+    "params": {
+        "sample_uid": "6090833622",
+        "sample_type": "wholeblood/miniblood"
+        "smear": {
+            "isPrint": true,
+            "isSmear": true,
+            "isStain": true,
+            "count": 1,
+            "hct": 1,
+            "level": 1
+        },
+		"slides": [
+			{
+				"sample_uid": "Rt112",
+				"slide_uid": "Rt112-1",
+				"print": {
+					"code": "QRcode",
+					"line1": "Rt112",
+					"line2": "date",
+					"line3": "",
+					"sample_id": "Rt112"
+				}
+			},	
+			{
+				"sample_uid": "Rt112",
+				"slide_uid": "Rt112-2",
+				"print": {
+					"code": "QRcode",
+					"line1": "Rt112",
+					"line2": "date",
+					"line3": "",
+					"sample_id": "Rt112"
+				}
+			}
+		]
+		"isRet":true
+    }
+}
+
+{
+	"id": 2,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.Config.Smear",
+	"params": {
+		"isUserParams":true,
+		"smearParams":{
+			"smearHeadZ":1,
+			"sampleExtendPos":12000
+			"sampleExtendTime":3,
+			"smearStartSpeed":4,
+			"smearMaxSpeed":5,
+			"smearRange":6,
+			"smearZWaitTime":7,
+			"smearZStartTime":8,
+			"smearZMaxTime":9,
+			"smearZRange":2000
+		}
+	}
+}
+{
+	"id": 2,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.Config.SmearDry",
+	"params": {
+		"time":20,
+		"temp":3670	
+	}
+}
+
+{
+	"id": 2,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.Config.StainDry",
+	"params": {
+		"time":20,
+		"temp":3670	
+	}
+}
+
+
+
+
+
+{
+	"id": 2,
+	"jsonrpc": "2.0",
+	"method": "MiddleCtrl.Config.AddSample",
+	"params": {
+		"isUserParams":true,
+		"addSampleParams":{
+			"addSampleValue":200
+		}
+	}
+}
+
+
+{
+	"id": 2,
+	"jsonrpc": "2.0",
+	"method": "MidCtrl.Maintain.SetPoolStatus",
+	"params": {
+		"pool": "c2a",
+		"isFilled": false
+	}
+}
+
+{	
+	"id": 2,
+	"jsonrpc": "2.0",
+	"method": "LabXpert.Order.QuerySampleInfo",
+	"params": {
+		"info_list":[
+			"HCT"
+		],
+		"query_condition":"test_uid",
+		"query_value":"test-1"
+	}
+}
+
+
+{	
+	"id": 2,
+	"jsonrpc": "2.0",
+	"method": "LabXpert.Order.QuerySampleInfo",
+	"result": {
+		"info_list":[
+			"HCT":65.9
+		],
+		"query_state":true	
+	}
+}

@@ -1,0 +1,248 @@
+{
+	"canbus": {
+		"enable": true,
+		"websocket": {
+			"address": "172.16.0.238",
+			"port": 9096,
+			"reconnect_interval": 1000
+		}
+	},
+	"check": {
+		"stain": {
+			"enable": true,
+			"floater": [
+				{
+					"port": 0,
+					"id": "Lack_of_Fix",
+					"alarm_value": 1
+				},
+				{
+					"port": 1,
+					"id": "Lack_of_A1",
+					"alarm_value": 1
+				},
+				{
+					"port": 2,
+					"id": "Lack_of_B1",
+					"alarm_value": 1
+				},
+				{
+					"port": 3,
+					"id": "Lack_of_B2",
+					"alarm_value": 9
+				},
+				{
+					"port": 4,
+					"id": "Lack_of_A2",
+					"alarm_value": 9
+				},
+				{
+					"port": 5,
+					"id": "Lack_of_Water",
+					"alarm_value": 1
+				},
+				{
+					"port": 6,
+					"id": "Waste1_Full",
+					"alarm_value": 1
+				},
+				{
+					"port": 7,
+					"id": "Waste2_Full",
+					"alarm_value": 1
+				}
+			]
+		},
+		"sample": {
+			"enable": true,
+			"floater": [
+				{
+					"port": 0,
+					"id": "Lack_of_Diluent",
+					"alarm_value": 1
+				},
+				{
+					"port": 1,
+					"id": "WasteTank_Full",
+					"alarm_value": 1
+				}
+			]
+		}
+	},
+	"general": {},
+	"log": {
+		"enable": true,
+		"file_max_count": 10,
+		"save_text_en": true,
+		"clear_sample_history": false
+	},
+	"lights": {
+		"slide_store_1_en": false,
+		"slide_store_2_en": false,
+		"stain_only1_en": false,
+		"stain_only2_en": false
+	},
+	"print": {
+		"enable": false,
+		"self_test": {
+			"QRcode": "123456789-012:98765",
+			"content": {
+				"line1": "",
+				"line2": "",
+				"line3": ""
+			},
+			"enable": false
+		}
+	},
+	"reader": {
+		"enable": false,
+		"websocket": {
+			"address": "10.0.0.1",
+			"autodetect_key": "Reader_x",
+			"isAutoDetect": false,
+			"keep_alive_count": 10,
+			"keep_alive_en": false,
+			"port": 20046,
+			"reconnect_interval": 1000
+		}
+	},
+	"sampling": {
+		"scan_slide_en": false
+	},
+	"shutdown": {
+		"clean_allslots": {
+			"dtergent_1": "water",
+			"dtergent": "alcohol",
+			"enable": true
+		},
+		"clean_blade": true,
+		"clean_needle": true
+	},
+	"slot_setup": {
+		"standard": {
+			"stain_slot": {
+				"c1": {
+					"from": 33,
+					"to": 27
+				},
+				"c2": {
+					"from": 50,
+					"to": 34
+				},
+				"fix": {
+					"from": 21,
+					"to": 22
+				},
+				"fixdry": {
+					"from": 23,
+					"to": 25
+				},
+				"import": {
+					"from": 26,
+					"to": 26
+				},
+				"recycle": {
+					"from": 62,
+					"to": 53
+				},
+				"stainOnly1": {
+					"from": 1,
+					"to": 10
+				},
+				"stainOnly2": {
+					"from": 11,
+					"to": 20
+				},
+				"transfer1": {
+					"from": 37,
+					"to": 37
+				},
+				"wash": {
+					"from": 51,
+					"to": 52
+				}
+			}
+		}
+	},
+	"smear": {
+		"dryfan": {
+			"duration": 15,
+			"enable": true,
+			"temperature": 37
+		}
+	},
+	"stain": {
+		"auto_fill_solution": {
+			"auto_fill_c1": true,
+			"auto_fill_c2": true,
+			"auto_fill_fix": true
+		},
+		"drainer": {
+			"auto_drain_tank_min": 30,
+			"max_drain_slot_count": 10,
+			"floater_alarm_force_drain": true
+		},
+		"dryfan": {
+			"duration": 60,
+			"enable": true,
+			"temperature": 37
+		},
+		"import_check_new": 45,
+		"slot_duration_cycle": 45,
+		"solution_change": {
+			"c1": 5,
+			"c2": 1,
+			"fix": 10
+		},
+		"stain_process_default": [
+			"fix",
+			"fixdry",
+			"c1",
+			"c2",
+			"wash"
+		],
+		"clean_slots": {
+			"water_clean": {
+				"soak_time_s": 2
+			},
+			"alcohol_clean": {
+				"soak_time_s": 300
+			}
+		},
+		"recycle_box": {
+			"check_manu_sensor": true
+		}
+	},
+	"startup": {
+		"auto_perfuse": {
+			"enable": true,
+			"max_duration_hr": 6,
+			"perfuse_sampling": true,
+			"perfuse_stain": true
+		},
+		"autoTest_start": false
+	},
+	"track": {
+		"enable": true,
+		"scan_duration": 2500
+	},
+	"united": {
+		"enable": false,
+		"websocket": {
+			"address": "10.0.0.2",
+			"autodetect_key": "United_x",
+			"isAutoDetect": false,
+			"keep_alive_count": 3,
+			"keep_alive_en": true,
+			"port": 10086,
+			"reconnect_interval": 1000
+		}
+	},
+	"websocket_server": {
+		"UDP_key": "Smear",
+		"port": 10096,
+		"send_UDP": false,
+		"keep_alive_count": 30,
+		"keep_alive_en": false
+	}
+}

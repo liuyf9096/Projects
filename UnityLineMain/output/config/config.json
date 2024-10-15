@@ -1,0 +1,62 @@
+{
+	"canbus": {
+		"enable": true,
+		"websocket": {
+			"address": "127.0.0.1",
+			"port": 9096,
+			"reconnect_interval": 1000
+		}
+	},
+	"general": {
+		"aging_test_mode": false,
+		"exit_count": 2,
+		"station_count": 2,
+		"timesync": false,
+		"scan_barcode_ms": 5000,
+		"max_waiting_time_sec": 180,
+		"clear_db_onstart": false,
+		"smearOnly": {
+			"enable": false,
+			"barcode": "888"
+		}
+	},
+	"log": {
+		"enable": false,
+		"file_max_count": 10,
+		"save_text_en": true
+	},
+	"DMU": {
+		"enable": false,
+		"websocket": {
+			"address": "172.16.0.128",
+			"autodetect_key": "DMU_1",
+			"isAutoDetect": false,
+			"keep_alive_count": 10,
+			"keep_alive_en": true,
+			"port": 10096,
+			"reconnect_interval": 1000
+		}
+	},
+	"import": {
+		"max_fail_count": 5
+	},
+	"websocket_server": {
+		"UDP_key": "United_1",
+		"keep_alive_count": 10,
+		"keep_alive_en": true,
+		"port": 10086,
+		"send_UDP": false
+	},
+	"line_device": [
+		{
+			"devid": "BF800",
+			"isUnited": true,
+			"type": "bloodtest"
+		},
+		{
+			"devid": "BD2000",
+			"isUnited": true,
+			"type": "smear"
+		}
+	]
+}

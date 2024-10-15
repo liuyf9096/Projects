@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>StainPoolPage</class>
+ <widget class="QWidget" name="StainPoolPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1519</width>
+    <height>759</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QGroupBox" name="groupBox_fix">
+   <property name="geometry">
+    <rect>
+     <x>1190</x>
+     <y>40</y>
+     <width>281</width>
+     <height>125</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>fix</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+   <layout class="QHBoxLayout" name="fixLayout"/>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_a1">
+   <property name="geometry">
+    <rect>
+     <x>700</x>
+     <y>40</y>
+     <width>471</width>
+     <height>125</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>a1</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+   <layout class="QHBoxLayout" name="a1Layout"/>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_c1">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>40</y>
+     <width>471</width>
+     <height>125</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>c1</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+   <layout class="QHBoxLayout" name="c1Layout"/>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_c2_a">
+   <property name="geometry">
+    <rect>
+     <x>770</x>
+     <y>200</y>
+     <width>701</width>
+     <height>125</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>c2_a</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+   <layout class="QHBoxLayout" name="c2aLayout"/>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_c2_b">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>200</y>
+     <width>701</width>
+     <height>125</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>c2_b</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+   <layout class="QHBoxLayout" name="c2bLayout"/>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_transfer">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>40</y>
+     <width>91</width>
+     <height>121</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>G1 &lt;-&gt; G2</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+   <layout class="QHBoxLayout" name="transferLayout"/>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_wash">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>360</y>
+     <width>151</width>
+     <height>121</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>wash</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+   <layout class="QHBoxLayout" name="washLayout"/>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_box">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>520</y>
+     <width>701</width>
+     <height>125</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>recycle box</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+   <layout class="QHBoxLayout" name="boxLayout"/>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

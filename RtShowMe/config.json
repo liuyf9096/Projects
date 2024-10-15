@@ -1,0 +1,12 @@
+{
+	"key": [
+		"ShowReeToo",
+		"ShowTriUnity"
+	],
+	"name": "YourName",
+	"port": {
+		"listen": 12345,
+		"send": 12445
+	},
+	"check_interval": 5000
+}

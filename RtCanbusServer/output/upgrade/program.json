@@ -1,0 +1,508 @@
+{
+    "board": [
+        {
+            "board_id": 49,
+            "board_name": "轨道板1",
+            "board_type": "motor_25",
+            "combo_program": [
+                {
+                    "decription": "开启扫码1",
+                    "func_id": 551,
+                    "program": [
+                        "ScanCode_Open,SCAN_CODE_1,ARG0"
+                    ]
+                }
+            ],
+            "datetime": "2022-12-01 09:28:43",
+            "version": "2.0.1.1"
+        },
+        {
+            "board_id": 50,
+            "board_name": "轨道板2",
+            "board_type": "motor_25",
+            "combo_program": [
+                {
+                    "decription": "参数配置",
+                    "func_id": 1,
+                    "program": [
+                        "Motor_SetSpeed,MOTOR_TRACK_OUT_SIDE,3200,1600,3200",
+                        "Motor_SetSpeed,MOTOR_TRACK_IN_SIDE,3200,1600,3200",
+                        "Motor_SetSpeed,MOTOR_SAMPLE_OUT2,3200,1600,3200",
+                        "Motor_SetSpeed,MOTOR_EMERGENCY2,1600,1600,3200",
+                        "Motor_SetSpeed,MOTOR_EMERGENCY3,1600,1600,3200",
+                        "Motor_SetSpeed,MOTOR_5,1600,1600,3200",
+                        "Motor_SetSpeed,MOTOR_6,1600,1600,3200",
+                        "Motor_SetSpeed,MOTOR_7,800,1600,3200",
+                        "DelayMs,100",
+                        "Motor_SetStep,MOTOR_TRACK_OUT_SIDE,500,50,500,500,60000",
+                        "Motor_SetStep,MOTOR_TRACK_IN_SIDE,500,50,500,500,60000",
+                        "Motor_SetStep,MOTOR_SAMPLE_OUT2,500,20,500,500,9000",
+                        "Motor_SetStep,MOTOR_EMERGENCY2,500,50,500,500,6500",
+                        "Motor_SetStep,MOTOR_EMERGENCY3,500,50,500,500,6500",
+                        "Motor_SetStep,MOTOR_5,500,50,500,500,15000",
+                        "Motor_SetStep,MOTOR_6,500,50,500,500,1000",
+                        "Motor_SetStep,MOTOR_7,500,50,500,500,60000",
+                        "DelayMs,100",
+                        "Motor_SetResetOptic,MOTOR_TRACK_OUT_SIDE,0,255,0",
+                        "Motor_SetResetOptic,MOTOR_TRACK_IN_SIDE,0,255,0",
+                        "Motor_SetResetOptic,MOTOR_SAMPLE_OUT2,0,255,1",
+                        "Motor_SetResetOptic,MOTOR_EMERGENCY2,0,255,1",
+                        "Motor_SetResetOptic,MOTOR_EMERGENCY3,0,255,1",
+                        "Motor_SetResetOptic,MOTOR_5,1,255,1",
+                        "Motor_SetResetOptic,MOTOR_6,1,255,1",
+                        "Motor_SetResetOptic,MOTOR_7,0,255,0",
+                        "DelayMs,100",
+                        "Motor_SetThreshold,MOTOR_TRACK_OUT_SIDE,1",
+                        "Motor_SetThreshold,MOTOR_TRACK_IN_SIDE,1",
+                        "Motor_SetThreshold,MOTOR_SAMPLE_OUT2,1",
+                        "Motor_SetThreshold,MOTOR_EMERGENCY2,1",
+                        "Motor_SetThreshold,MOTOR_EMERGENCY3,1",
+                        "Motor_SetThreshold,MOTOR_5,1",
+                        "Motor_SetThreshold,MOTOR_6,1",
+                        "Motor_SetThreshold,MOTOR_7,1",
+                        "DelayMs,100",
+                        "Motor_SetMicroStep,MOTOR_TRACK_OUT_SIDE,MICROSTEP_8",
+                        "Motor_SetMicroStep,MOTOR_TRACK_IN_SIDE,MICROSTEP_8",
+                        "Motor_SetMicroStep,MOTOR_SAMPLE_OUT2,MICROSTEP_8",
+                        "Motor_SetMicroStep,MOTOR_EMERGENCY2,MICROSTEP_8",
+                        "Motor_SetMicroStep,MOTOR_EMERGENCY3,MICROSTEP_8",
+                        "Motor_SetMicroStep,MOTOR_5,MICROSTEP_8",
+                        "Motor_SetMicroStep,MOTOR_6,MICROSTEP_8",
+                        "Motor_SetMicroStep,MOTOR_7,MICROSTEP_8",
+                        "DelayMs,100",
+                        "Motor_SetCurrent,MOTOR_TRACK_OUT_SIDE,CURRENT_LEVEL_4,CURRENT_LEVEL_13",
+                        "Motor_SetCurrent,MOTOR_TRACK_IN_SIDE,CURRENT_LEVEL_4,CURRENT_LEVEL_13",
+                        "Motor_SetCurrent,MOTOR_SAMPLE_OUT2,CURRENT_LEVEL_2,CURRENT_LEVEL_13",
+                        "Motor_SetCurrent,MOTOR_EMERGENCY2,CURRENT_LEVEL_2,CURRENT_LEVEL_13",
+                        "Motor_SetCurrent,MOTOR_EMERGENCY3,CURRENT_LEVEL_2,CURRENT_LEVEL_13",
+                        "Motor_SetCurrent,MOTOR_5,CURRENT_LEVEL_2,CURRENT_LEVEL_9",
+                        "Motor_SetCurrent,MOTOR_6,CURRENT_LEVEL_0,CURRENT_LEVEL_3",
+                        "Motor_SetCurrent,MOTOR_7,CURRENT_LEVEL_2,CURRENT_LEVEL_9",
+                        "DelayMs,100",
+                        "Param_SetOpticCheckLevel,OPTIC_TRACK_OUT_SIDE,0",
+                        "Param_SetOpticCheckLevel,OPTIC_TRACK_IN_SIDE,0",
+                        "Param_SetOpticCheckLevel,OPTIC_SAMPLE_OUT2,1",
+                        "Param_SetOpticCheckLevel,OPTIC_EMERGENCY2,1",
+                        "Param_SetOpticCheckLevel,OPTIC_EMERGENCY3,1",
+                        "Param_SetOpticCheckLevel,OPTIC_5,1",
+                        "Param_SetOpticCheckLevel,OPTIC_6,1",
+                        "Param_SetOpticCheckLevel,OPTIC_7,1",
+                        "Param_SetOpticCheckLevel,OPTIC_EMERGENCY2_CHECK1,1",
+                        "Param_SetOpticCheckLevel,OPTIC_9,1",
+                        "Param_SetOpticCheckLevel,OPTIC_10,1",
+                        "Param_SetOpticCheckLevel,OPTIC_11,1",
+                        "DelayMs,100",
+                        "Param_SetOpticCheckLevel,OPTIC_EMERGENCY2_CHECK2,0",
+                        "Param_SetOpticCheckLevel,OPTIC_SCAN_CODE2,0",
+                        "Param_SetOpticCheckLevel,OPTIC_SCAN_CODE3,0",
+                        "Param_SetOpticCheckLevel,OPTIC_SAMPLE_OUT2_FULL,0",
+                        "Param_SetOpticCheckLevel,OPTIC_EMERGENCY3_CHECK1,1",
+                        "Param_SetOpticCheckLevel,OPTIC_EMERGENCY3_CHECK2,0",
+                        "Param_SetOpticCheckLevel,OPTIC_SAMPLE_OUT_MICRO_SWITCH,1",
+                        "Param_SetOpticCheckLevel,OPTIC_SAMPLE_OUT2_CHEKC,0",
+                        "Param_SetOpticCheckLevel,OPTIC_SAMPLE_OUT1_CHEKC,1",
+                        "Param_SetOpticCheckLevel,OPTIC_21,1",
+                        "Param_SetOpticCheckLevel,OPTIC_EMERGENCY2_TYPE_CHECK,1",
+                        "Param_SetOpticCheckLevel,OPTIC_EMERGENCY3_TYPE_CHECK,1",
+                        "DelayMs,100",
+                        "Motor_ParamWriteToFlash,0"
+                    ]
+                },
+                {
+                    "decription": "坐标配置",
+                    "func_id": 2,
+                    "program": [
+                        "Param_SetMotorPosition,MOTOR_TRACK_OUT_SIDE,POS_OUT_SIDE_RESET,0",
+                        "Param_SetMotorPosition,MOTOR_TRACK_OUT_SIDE,POS_OUT_SIDE_SAMPLE_IN,17010",
+                        "Param_SetMotorPosition,MOTOR_TRACK_OUT_SIDE,POS_OUT_SIDE_SCAN1,17900",
+                        "Param_SetMotorPosition,MOTOR_TRACK_OUT_SIDE,POS_OUT_SIDE_TEST1,18800",
+                        "Param_SetMotorPosition,MOTOR_TRACK_OUT_SIDE,POS_OUT_SIDE_SCAN2,25480",
+                        "Param_SetMotorPosition,MOTOR_TRACK_OUT_SIDE,POS_OUT_SIDE_TEST2,26380",
+                        "Param_SetMotorPosition,MOTOR_TRACK_OUT_SIDE,POS_OUT_SIDE_SAMPLE_OUT1,32980",
+                        "Param_SetMotorPosition,MOTOR_TRACK_OUT_SIDE,POS_OUT_SIDE_SAMPLE_OUT2,0",
+                        "Param_SetMotorPosition,MOTOR_TRACK_OUT_SIDE,POS_OUT_SIDE_TUBE_SPACE,430",
+                        "Param_SetMotorPosition,MOTOR_TRACK_OUT_SIDE,POS_OUT_SIDE_BLOCK_SPACE,4700",
+                        "DelayMs,100",
+                        "Param_SetMotorPosition,MOTOR_TRACK_IN_SIDE,POS_IN_SIDE_RESET,0",
+                        "Param_SetMotorPosition,MOTOR_TRACK_IN_SIDE,POS_IN_SIDE_SAMPLE_IN,5630",
+                        "Param_SetMotorPosition,MOTOR_TRACK_IN_SIDE,POS_IN_SIDE_SCAN1,6550",
+                        "Param_SetMotorPosition,MOTOR_TRACK_IN_SIDE,POS_IN_SIDE_TEST1,7450",
+                        "Param_SetMotorPosition,MOTOR_TRACK_IN_SIDE,POS_IN_SIDE_SCAN2,14100",
+                        "Param_SetMotorPosition,MOTOR_TRACK_IN_SIDE,POS_IN_SIDE_TEST2,15000",
+                        "Param_SetMotorPosition,MOTOR_TRACK_IN_SIDE,POS_IN_SIDE_SAMPLE_OUT1,21550",
+                        "Param_SetMotorPosition,MOTOR_TRACK_IN_SIDE,POS_IN_SIDE_SAMPLE_OUT2,0",
+                        "Param_SetMotorPosition,MOTOR_TRACK_IN_SIDE,POS_IN_SIDE_TUBE_SPACE,430",
+                        "Param_SetMotorPosition,MOTOR_TRACK_IN_SIDE,POS_IN_SIDE_BLOCK_SPACE,4700",
+                        "DelayMs,100",
+                        "Param_SetMotorPosition,MOTOR_SAMPLE_OUT2,POS_SAMPLE_OUT2_RESET,0",
+                        "Param_SetMotorPosition,MOTOR_SAMPLE_OUT2,POS_SAMPLE_OUT2_LIMIT,2800",
+                        "Param_SetMotorPosition,MOTOR_EMERGENCY2,POS_EMERGENCY2_RESET,0",
+                        "Param_SetMotorPosition,MOTOR_EMERGENCY2,POS_EMERGENCY2_LIMIT,5000",
+                        "Param_SetMotorPosition,MOTOR_EMERGENCY3,POS_EMERGENCY3_RESET,0",
+                        "Param_SetMotorPosition,MOTOR_EMERGENCY3,POS_EMERGENCY3_LIMIT,5000",
+                        "Motor_ParamWriteToFlash,0"
+                    ]
+                },
+                {
+                    "decription": "外侧履带初始化复位",
+                    "func_id": 201,
+                    "program": [
+                        "Motor_RecoverResetDircet,MOTOR_TRACK_OUT_SIDE",
+                        "Motor_OverTurnResetDirect,MOTOR_TRACK_OUT_SIDE",
+                        "MotorPreReset_Plus,MOTOR_TRACK_OUT_SIDE,Vlevel_12",
+                        "WaitOk,MOTOR_TRACK_OUT_SIDE",
+                        "MotorMoveFreeCCW_Plus,MOTOR_TRACK_OUT_SIDE,Vlevel_12,4600",
+                        "WaitOk,MOTOR_TRACK_OUT_SIDE",
+                        "Optic_CheckJumpForward,OPTIC_TRACK_OUT_SIDE,5,1",
+                        "MotorPreReset_Plus,MOTOR_TRACK_OUT_SIDE,Vlevel_12",
+                        "WaitOk,MOTOR_TRACK_OUT_SIDE",
+                        "MotorMoveFreeCCW_Plus,MOTOR_TRACK_OUT_SIDE,Vlevel_12,4600",
+                        "WaitOk,MOTOR_TRACK_OUT_SIDE",
+                        "Motor_OverTurnResetDirect,MOTOR_TRACK_OUT_SIDE",
+                        "Optic_IsCheck,OPTIC_TRACK_OUT_SIDE",
+                        "Motor_SetEncoder,MOTOR_TRACK_OUT_SIDE,ENCODER_0"
+                    ]
+                },
+                {
+                    "decription": "外侧履带运动到进试管架位",
+                    "func_id": 202,
+                    "program": [
+                        "MotorMovePosition_Plus,MOTOR_TRACK_OUT_SIDE,Vlevel_12,POS_OUT_SIDE_SAMPLE_IN",
+                        "WaitOk,MOTOR_TRACK_OUT_SIDE"
+                    ]
+                },
+                {
+                    "decription": "外侧履带运动到第1检测设备扫码位",
+                    "func_id": 203,
+                    "program": [
+                        "Motor_SetPosBaseFromPos,MOTOR_TRACK_OUT_SIDE,POS_OUT_SIDE_SCAN1",
+                        "Motor_MoveNPos_Plus,MOTOR_TRACK_OUT_SIDE,Vlevel_12,POS_OUT_SIDE_TUBE_SPACE,ARG0",
+                        "WaitOk,MOTOR_TRACK_OUT_SIDE",
+                        "Motor_SetPosBaseFromPos,MOTOR_TRACK_OUT_SIDE,POS_OUT_SIDE_RESET"
+                    ]
+                },
+                {
+                    "decription": "外侧履带运动到第1检测设备测试位",
+                    "func_id": 204,
+                    "program": [
+                        "Motor_SetPosBaseFromPos,MOTOR_TRACK_OUT_SIDE,POS_OUT_SIDE_TEST1",
+                        "Motor_MoveNPos_Plus,MOTOR_TRACK_OUT_SIDE,Vlevel_12,POS_OUT_SIDE_TUBE_SPACE,ARG0",
+                        "WaitOk,MOTOR_TRACK_OUT_SIDE",
+                        "Motor_SetPosBaseFromPos,MOTOR_TRACK_OUT_SIDE,POS_OUT_SIDE_RESET"
+                    ]
+                },
+                {
+                    "decription": "外侧履带运动到第2检测设备扫码位",
+                    "func_id": 205,
+                    "program": [
+                        "Motor_SetPosBaseFromPos,MOTOR_TRACK_OUT_SIDE,POS_OUT_SIDE_SCAN2",
+                        "Motor_MoveNPos_Plus,MOTOR_TRACK_OUT_SIDE,Vlevel_12,POS_OUT_SIDE_TUBE_SPACE,ARG0",
+                        "WaitOk,MOTOR_TRACK_OUT_SIDE",
+                        "Motor_SetPosBaseFromPos,MOTOR_TRACK_OUT_SIDE,POS_OUT_SIDE_RESET"
+                    ]
+                },
+                {
+                    "decription": "外侧履带运动到第2检测设备测试位",
+                    "func_id": 206,
+                    "program": [
+                        "Motor_SetPosBaseFromPos,MOTOR_TRACK_OUT_SIDE,POS_OUT_SIDE_TEST2",
+                        "Motor_MoveNPos_Plus,MOTOR_TRACK_OUT_SIDE,Vlevel_12,POS_OUT_SIDE_TUBE_SPACE,ARG0",
+                        "WaitOk,MOTOR_TRACK_OUT_SIDE",
+                        "Motor_SetPosBaseFromPos,MOTOR_TRACK_OUT_SIDE,POS_OUT_SIDE_RESET"
+                    ]
+                },
+                {
+                    "decription": "外侧履带运动到第3检测设备扫码位",
+                    "func_id": 207,
+                    "program": [
+                        "Motor_SetPosBaseFromPos,MOTOR_TRACK_OUT_SIDE,POS_OUT_SIDE_SCAN3",
+                        "Motor_MoveNPos_Plus,MOTOR_TRACK_OUT_SIDE,Vlevel_12,POS_OUT_SIDE_TUBE_SPACE,ARG0",
+                        "WaitOk,MOTOR_TRACK_OUT_SIDE",
+                        "Motor_SetPosBaseFromPos,MOTOR_TRACK_OUT_SIDE,POS_OUT_SIDE_RESET"
+                    ]
+                },
+                {
+                    "decription": "外侧履带运动到第3检测设备测试位",
+                    "func_id": 208,
+                    "program": [
+                        "Motor_SetPosBaseFromPos,MOTOR_TRACK_OUT_SIDE,POS_OUT_SIDE_TEST3",
+                        "Motor_MoveNPos_Plus,MOTOR_TRACK_OUT_SIDE,Vlevel_12,POS_OUT_SIDE_TUBE_SPACE,ARG0",
+                        "WaitOk,MOTOR_TRACK_OUT_SIDE",
+                        "Motor_SetPosBaseFromPos,MOTOR_TRACK_OUT_SIDE,POS_OUT_SIDE_RESET"
+                    ]
+                },
+                {
+                    "decription": "外侧履带运动到第一出试管架位",
+                    "func_id": 209,
+                    "program": [
+                        "MotorMovePosition_Plus,MOTOR_TRACK_OUT_SIDE,Vlevel_12,POS_OUT_SIDE_SAMPLE_OUT1",
+                        "WaitOk,MOTOR_TRACK_OUT_SIDE"
+                    ]
+                },
+                {
+                    "decription": "外侧履带运动到第二出试管架位",
+                    "func_id": 210,
+                    "program": [
+                        "MotorMovePosition_Plus,MOTOR_TRACK_OUT_SIDE,Vlevel_12,POS_OUT_SIDE_SAMPLE_OUT2",
+                        "WaitOk,MOTOR_TRACK_OUT_SIDE"
+                    ]
+                },
+                {
+                    "decription": "外侧履带相对前进n个试管位置",
+                    "func_id": 211,
+                    "program": [
+                        "TRACK_GO_FORWARD,MOTOR_TRACK_OUT_SIDE,Vlevel_12,ARG0",
+                        "WaitOk,MOTOR_TRACK_OUT_SIDE"
+                    ]
+                },
+                {
+                    "decription": "外侧履带相对后退n个试管位置",
+                    "func_id": 212,
+                    "program": [
+                        "TRACK_GO_BACK,MOTOR_TRACK_OUT_SIDE,Vlevel_12,ARG0",
+                        "WaitOk,MOTOR_TRACK_OUT_SIDE"
+                    ]
+                },
+                {
+                    "decription": "内侧皮带初始化复位",
+                    "func_id": 251,
+                    "program": [
+                        "Motor_RecoverResetDircet,MOTOR_TRACK_IN_SIDE",
+                        "Motor_OverTurnResetDirect,MOTOR_TRACK_IN_SIDE",
+                        "MotorPreReset_Plus,MOTOR_TRACK_IN_SIDE,Vlevel_12",
+                        "WaitOk,MOTOR_TRACK_IN_SIDE",
+                        "MotorMoveFreeCCW_Plus,MOTOR_TRACK_IN_SIDE,Vlevel_12,4600",
+                        "WaitOk,MOTOR_TRACK_IN_SIDE",
+                        "Optic_CheckJumpForward,OPTIC_TRACK_IN_SIDE,5,1",
+                        "MotorPreReset_Plus,MOTOR_TRACK_IN_SIDE,Vlevel_12",
+                        "WaitOk,MOTOR_TRACK_IN_SIDE",
+                        "MotorMoveFreeCCW_Plus,MOTOR_TRACK_IN_SIDE,Vlevel_12,4600",
+                        "WaitOk,MOTOR_TRACK_IN_SIDE",
+                        "Motor_OverTurnResetDirect,MOTOR_TRACK_IN_SIDE",
+                        "Optic_IsCheck,OPTIC_TRACK_IN_SIDE",
+                        "Motor_SetEncoder,MOTOR_TRACK_IN_SIDE,ENCODER_1"
+                    ]
+                },
+                {
+                    "decription": "内侧履带运动到进试管架位",
+                    "func_id": 252,
+                    "program": [
+                        "MotorMovePosition_Plus,MOTOR_TRACK_IN_SIDE,Vlevel_12,POS_IN_SIDE_SAMPLE_IN",
+                        "WaitOk,MOTOR_TRACK_IN_SIDE"
+                    ]
+                },
+                {
+                    "decription": "内侧履带运动到第一检测设备扫码位",
+                    "func_id": 253,
+                    "program": [
+                        "Motor_SetPosBaseFromPos,MOTOR_TRACK_IN_SIDE,POS_IN_SIDE_SCAN1",
+                        "Motor_MoveNPos_Plus,MOTOR_TRACK_IN_SIDE,Vlevel_12,POS_IN_SIDE_TUBE_SPACE,ARG0",
+                        "WaitOk,MOTOR_TRACK_IN_SIDE",
+                        "Motor_SetPosBaseFromPos,MOTOR_TRACK_IN_SIDE,POS_IN_SIDE_RESET"
+                    ]
+                },
+                {
+                    "decription": "内侧履带运动到第一检测设备测试位",
+                    "func_id": 254,
+                    "program": [
+                        "Motor_SetPosBaseFromPos,MOTOR_TRACK_IN_SIDE,POS_IN_SIDE_TEST1",
+                        "Motor_MoveNPos_Plus,MOTOR_TRACK_IN_SIDE,Vlevel_12,POS_IN_SIDE_TUBE_SPACE,ARG0",
+                        "WaitOk,MOTOR_TRACK_IN_SIDE",
+                        "Motor_SetPosBaseFromPos,MOTOR_TRACK_IN_SIDE,POS_IN_SIDE_RESET"
+                    ]
+                },
+                {
+                    "decription": "内侧履带运动到第二检测设备扫码位",
+                    "func_id": 255,
+                    "program": [
+                        "Motor_SetPosBaseFromPos,MOTOR_TRACK_IN_SIDE,POS_IN_SIDE_SCAN2",
+                        "Motor_MoveNPos_Plus,MOTOR_TRACK_IN_SIDE,Vlevel_12,POS_IN_SIDE_TUBE_SPACE,ARG0",
+                        "WaitOk,MOTOR_TRACK_IN_SIDE",
+                        "Motor_SetPosBaseFromPos,MOTOR_TRACK_IN_SIDE,POS_IN_SIDE_RESET"
+                    ]
+                },
+                {
+                    "decription": "内侧履带运动到第二检测设备测试位",
+                    "func_id": 256,
+                    "program": [
+                        "Motor_SetPosBaseFromPos,MOTOR_TRACK_IN_SIDE,POS_IN_SIDE_TEST2",
+                        "Motor_MoveNPos_Plus,MOTOR_TRACK_IN_SIDE,Vlevel_12,POS_IN_SIDE_TUBE_SPACE,ARG0",
+                        "WaitOk,MOTOR_TRACK_IN_SIDE",
+                        "Motor_SetPosBaseFromPos,MOTOR_TRACK_IN_SIDE,POS_IN_SIDE_RESET"
+                    ]
+                },
+                {
+                    "decription": "内侧履带运动到第三检测设备扫码位",
+                    "func_id": 257,
+                    "program": [
+                        "Motor_SetPosBaseFromPos,MOTOR_TRACK_IN_SIDE,POS_IN_SIDE_SCAN3",
+                        "Motor_MoveNPos_Plus,MOTOR_TRACK_IN_SIDE,Vlevel_12,POS_IN_SIDE_TUBE_SPACE,ARG0",
+                        "WaitOk,MOTOR_TRACK_IN_SIDE",
+                        "Motor_SetPosBaseFromPos,MOTOR_TRACK_IN_SIDE,POS_IN_SIDE_RESET"
+                    ]
+                },
+                {
+                    "decription": "内侧履带运动到第三检测设备测试位",
+                    "func_id": 258,
+                    "program": [
+                        "Motor_SetPosBaseFromPos,MOTOR_TRACK_IN_SIDE,POS_IN_SIDE_TEST3",
+                        "Motor_MoveNPos_Plus,MOTOR_TRACK_IN_SIDE,Vlevel_12,POS_IN_SIDE_TUBE_SPACE,ARG0",
+                        "WaitOk,MOTOR_TRACK_IN_SIDE",
+                        "Motor_SetPosBaseFromPos,MOTOR_TRACK_IN_SIDE,POS_IN_SIDE_RESET"
+                    ]
+                },
+                {
+                    "decription": "内侧履带运动到第一出试管架位",
+                    "func_id": 259,
+                    "program": [
+                        "MotorMovePosition_Plus,MOTOR_TRACK_IN_SIDE,Vlevel_12,POS_IN_SIDE_SAMPLE_OUT1",
+                        "WaitOk,MOTOR_TRACK_IN_SIDE"
+                    ]
+                },
+                {
+                    "decription": "内侧履带运动到第二出试管架位",
+                    "func_id": 260,
+                    "program": [
+                        "MotorMovePosition_Plus,MOTOR_TRACK_IN_SIDE,Vlevel_12,POS_IN_SIDE_SAMPLE_OUT2",
+                        "WaitOk,MOTOR_TRACK_IN_SIDE"
+                    ]
+                },
+                {
+                    "decription": "内侧履带相对前进n个试管位置",
+                    "func_id": 261,
+                    "program": [
+                        "TRACK_GO_FORWARD,MOTOR_TRACK_IN_SIDE,Vlevel_12,ARG0",
+                        "WaitOk,MOTOR_TRACK_IN_SIDE"
+                    ]
+                },
+                {
+                    "decription": "内侧履带相对后退n个试管位置",
+                    "func_id": 262,
+                    "program": [
+                        "TRACK_GO_BACK,MOTOR_TRACK_IN_SIDE,Vlevel_12,ARG0",
+                        "WaitOk,MOTOR_TRACK_IN_SIDE"
+                    ]
+                },
+                {
+                    "decription": "出样组件2初始化复位",
+                    "func_id": 401,
+                    "program": [
+                        "MotorPreReset_Plus,MOTOR_SAMPLE_OUT2,Vlevel_6",
+                        "WaitOk,MOTOR_SAMPLE_OUT2",
+                        "Optic_IsCheck,OPTIC_SAMPLE_OUT2"
+                    ]
+                },
+                {
+                    "decription": "出样组件2卸载试管架",
+                    "func_id": 402,
+                    "program": [
+                        "MotorMovePosition_Plus,MOTOR_SAMPLE_OUT2,Vlevel_6,POS_SAMPLE_OUT2_LIMIT",
+                        "WaitOk,MOTOR_SAMPLE_OUT2",
+                        "MotorPreReset_Plus,MOTOR_SAMPLE_OUT2,Vlevel_6",
+                        "WaitOk,MOTOR_SAMPLE_OUT2",
+                        "Optic_IsCheck,OPTIC_SAMPLE_OUT2"
+                    ]
+                },
+                {
+                    "decription": "急诊组件2初始化复位",
+                    "func_id": 451,
+                    "program": [
+                        "MotorPreReset_Plus,MOTOR_EMERGENCY2,Vlevel_8",
+                        "WaitOk,MOTOR_EMERGENCY2",
+                        "Optic_IsCheck,OPTIC_EMERGENCY2"
+                    ]
+                },
+                {
+                    "decription": "急诊组件2运动到放置试管位置",
+                    "func_id": 452,
+                    "program": [
+                        "MotorMovePosition_Plus,MOTOR_EMERGENCY2,Vlevel_8,POS_EMERGENCY2_LIMIT",
+                        "WaitOk,MOTOR_EMERGENCY2"
+                    ]
+                },
+                {
+                    "decription": "急诊组件3初始化复位",
+                    "func_id": 501,
+                    "program": [
+                        "MotorPreReset_Plus,MOTOR_EMERGENCY3,Vlevel_8",
+                        "WaitOk,MOTOR_EMERGENCY3",
+                        "Optic_IsCheck,OPTIC_EMERGENCY3"
+                    ]
+                },
+                {
+                    "decription": "急诊组件3运动到放置试管位置",
+                    "func_id": 502,
+                    "program": [
+                        "MotorMovePosition_Plus,MOTOR_EMERGENCY3,Vlevel_8,POS_EMERGENCY3_LIMIT",
+                        "WaitOk,MOTOR_EMERGENCY3"
+                    ]
+                },
+                {
+                    "decription": "扫码2开启扫码",
+                    "func_id": 551,
+                    "program": [
+                        "ScanCode_Open,SCAN_CODE_2,ARG0"
+                    ]
+                },
+                {
+                    "decription": "扫码2关闭扫码",
+                    "func_id": 552,
+                    "program": [
+                        "ScanCode_Close,SCAN_CODE_2"
+                    ]
+                },
+                {
+                    "decription": "扫码3开启扫码",
+                    "func_id": 601,
+                    "program": [
+                        "ScanCode_Open,SCAN_CODE_3,ARG0"
+                    ]
+                },
+                {
+                    "decription": "扫码3关闭扫码",
+                    "func_id": 602,
+                    "program": [
+                        "ScanCode_Close,SCAN_CODE_3"
+                    ]
+                },
+                {
+                    "decription": "系统初始化",
+                    "func_id": 801,
+                    "program": [
+                        "ScanCode_Close,SCAN_CODE_2",
+                        "ScanCode_Close,SCAN_CODE_3",
+                        "MotorPreReset_Plus,MOTOR_EMERGENCY2,1600",
+                        "MotorPreReset_Plus,MOTOR_EMERGENCY3,1600",
+                        "Optic_CheckJumpForward,OPTIC_SAMPLE_OUT_MICRO_SWITCH,1,8",
+                        "Optic_CheckLevel1,OPTIC_SAMPLE_OUT2_FULL",
+                        "MotorReset_Plus,MOTOR_SAMPLE_OUT2,Vlevel_5",
+                        "WaitOk,MOTOR_SAMPLE_OUT2",
+                        "MotorMovePosition_Plus,MOTOR_SAMPLE_OUT2,Vlevel_5,POS_SAMPLE_OUT2_LIMIT",
+                        "WaitOk,MOTOR_SAMPLE_OUT2",
+                        "MotorPreReset_Plus,MOTOR_SAMPLE_OUT2,Vlevel_5",
+                        "WaitOk,MOTOR_SAMPLE_OUT2",
+                        "WaitOk,MOTOR_EMERGENCY2",
+                        "WaitOk,MOTOR_EMERGENCY3",
+                        "Optic_IsCheck,OPTIC_EMERGENCY2",
+                        "Optic_IsCheck,OPTIC_EMERGENCY3"
+                    ]
+                },
+                {
+                    "decription": "自启动程序",
+                    "func_id": 888,
+                    "program": [
+                        "ScanCode_Init,SCAN_CODE_2",
+                        "ScanCode_Init,SCAN_CODE_3",
+                        "ScanCode_Close,SCAN_CODE_2",
+                        "ScanCode_Close,SCAN_CODE_3",
+                        "Motor_SetInject,MOTOR_TRACK_OUT_SIDE,430,1",
+                        "Motor_SetInject,MOTOR_TRACK_IN_SIDE,430,1"
+                    ]
+                }
+            ],
+            "datetime": "2022-12-01 09:28:43",
+            "version": "2.0.1.1"
+        }
+    ],
+    "project_name": "轨道双拼机"
+}
