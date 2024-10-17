@@ -1,0 +1,2651 @@
+#include "DM1Protocol.h"
+
+#include <QDataStream>
+#include <QJsonArray>
+#include <QDateTime>
+#include <QTime>
+#include <QtEndian>
+#include <QDebug>
+
+DM1Protocol *DM1Protocol::getInstance()
+{
+    static DM1Protocol *instance = nullptr;
+    if (instance == nullptr) {
+        instance = new DM1Protocol();
+    }
+    return instance;
+}
+
+DM1Protocol::DM1Protocol(QObject *parent) : QObject(parent)
+{
+    _packetFunctionInit();
+    _parseFunctionInit();
+}
+
+void DM1Protocol::_packetFunctionInit()
+{
+    /* id:0~5 */
+    m_encodeFuncMap.insert("SetDeviceSN", &DM1Protocol::encodeSetDeviceSN);
+    m_encodeFuncMap.insert("GetDeviceSN", &DM1Protocol::encodeGetDeviceSN);
+    m_encodeFuncMap.insert("SetDeviceName", &DM1Protocol::encodeSetDeviceName);
+    m_encodeFuncMap.insert("GetDeviceName", &DM1Protocol::encodeGetDeviceName);
+    m_encodeFuncMap.insert("GetDeviceVersion", &DM1Protocol::encodeGetDeviceVersion);
+    m_encodeFuncMap.insert("GetHardwareVersion", &DM1Protocol::encodeGetHardwareVersion);
+
+    /* id:10~13 */
+    m_encodeFuncMap.insert("GetPose", &DM1Protocol::encodeGetPose);
+    m_encodeFuncMap.insert("ResetPose", &DM1Protocol::encodeResetPose);
+
+    /* id:20 */
+    m_encodeFuncMap.insert("GetAlarmsState", &DM1Protocol::encodeGetAlarmsState);
+    m_encodeFuncMap.insert("ClearAllAlarmsState", &DM1Protocol::encodeClearAllAlarmsState);
+
+    /* id:31、34 */
+    m_encodeFuncMap.insert("SetHOMECmd", &DM1Protocol::encodeSetHOMECmd);
+    m_encodeFuncMap.insert("SetHOMEInitialPos", &DM1Protocol::encodeSetHOMEInitialPos);
+
+    /* id:40~42 */
+    m_encodeFuncMap.insert("SetHHTTrigMode", &DM1Protocol::encodeSetHHTTrigMode);
+    m_encodeFuncMap.insert("GetHHTTrigMode", &DM1Protocol::encodeGetHHTTrigMode);
+    m_encodeFuncMap.insert("SetHHTTrigOutputEnabled", &DM1Protocol::encodeSetHHTTrigOutputEnabled);
+    m_encodeFuncMap.insert("GetHHTTrigOutputEnabled", &DM1Protocol::encodeGetHHTTrigOutputEnabled);
+    m_encodeFuncMap.insert("GetHHTTrigOutput", &DM1Protocol::encodeGetHHTTrigOutput);
+
+    m_encodeFuncMap.insert("SetArmOrientation", &DM1Protocol::encodeSetArmOrientation);
+    m_encodeFuncMap.insert("GetArmOrientation", &DM1Protocol::encodeGetArmOrientation);
+
+    /* id:60~61 */
+    m_encodeFuncMap.insert("SetEndEffectorParams", &DM1Protocol::encodeSetEndEffectorParams);
+    m_encodeFuncMap.insert("GetEndEffectorParams", &DM1Protocol::encodeGetEndEffectorParams);
+    m_encodeFuncMap.insert("SetEndEffectorLaser", &DM1Protocol::encodeSetEndEffectorLaser);
+    m_encodeFuncMap.insert("GetEndEffectorLaser", &DM1Protocol::encodeGetEndEffectorLaser);
+
+    /* id:70~76 */
+    m_encodeFuncMap.insert("SetJOGJointParams", &DM1Protocol::encodeSetJOGJointParams);
+    m_encodeFuncMap.insert("GetJOGJointParams", &DM1Protocol::encodeGetJOGJointParams);
+    m_encodeFuncMap.insert("SetJOGCoordinateParams", &DM1Protocol::encodeSetJOGCoordinateParams);
+    m_encodeFuncMap.insert("GetJOGCoordinateParams", &DM1Protocol::encodeGetJOGCoordinateParams);
+    m_encodeFuncMap.insert("SetJOGCommonParams", &DM1Protocol::encodeSetJOGCommonParams);
+    m_encodeFuncMap.insert("GetJOGCommonParams", &DM1Protocol::encodeGetJOGCommonParams);
+    m_encodeFuncMap.insert("SetJOGCmd", &DM1Protocol::encodeSetJOGCmd);
+    m_encodeFuncMap.insert("SetInchMode", &DM1Protocol::encodeSetInchMode);
+    m_encodeFuncMap.insert("GetInchMode", &DM1Protocol::encodeGetInchMode);
+    m_encodeFuncMap.insert("SetInchParam", &DM1Protocol::encodeSetInchParam);
+    m_encodeFuncMap.insert("GetInchParam", &DM1Protocol::encodeGetInchParam);
+
+    /* id:80~89 */
+    m_encodeFuncMap.insert("SetPTPJointParams", &DM1Protocol::encodeSetPTPJointParams);
+    m_encodeFuncMap.insert("GetPTPJointParams", &DM1Protocol::encodeGetPTPJointParams);
+    m_encodeFuncMap.insert("SetPTPCoordinateParams", &DM1Protocol::encodeSetPTPCoordinateParams);
+    m_encodeFuncMap.insert("GetPTPCoordinateParams", &DM1Protocol::encodeGetPTPCoordinateParams);
+    m_encodeFuncMap.insert("SetPTPJumpParams", &DM1Protocol::encodeSetPTPJumpParams);
+    m_encodeFuncMap.insert("GetPTPJumpParams", &DM1Protocol::encodeGetPTPJumpParams);
+    m_encodeFuncMap.insert("SetPTPCommonParams", &DM1Protocol::encodeSetPTPCommonParams);
+    m_encodeFuncMap.insert("GetPTPCommonParams", &DM1Protocol::encodeGetPTPCommonParams);
+    m_encodeFuncMap.insert("SetPTPCmd", &DM1Protocol::encodeSetPTPCmd);
+
+    /* id:90~95 */
+    m_encodeFuncMap.insert("SetCPParams", &DM1Protocol::encodeSetCPParams);
+    m_encodeFuncMap.insert("GetCPParams", &DM1Protocol::encodeGetCPParams);
+    m_encodeFuncMap.insert("SetCPCmd", &DM1Protocol::encodeSetCPCmd);
+    m_encodeFuncMap.insert("SetCPLECmd", &DM1Protocol::encodeSetCPLECmd);
+
+    /* id:100~103 */
+    m_encodeFuncMap.insert("SetARCParams", &DM1Protocol::encodeSetARCParams);
+    m_encodeFuncMap.insert("GetARCParams", &DM1Protocol::encodeGetARCParams);
+    m_encodeFuncMap.insert("SetARCCmd", &DM1Protocol::encodeSetARCCmd);
+    m_encodeFuncMap.insert("SetCircleCmd", &DM1Protocol::encodeSetCircleCmd);
+
+    /* id:110 */
+    m_encodeFuncMap.insert("SetWAITCmd", &DM1Protocol::encodeSetWAITCmd);
+
+    /* id:120 */
+    m_encodeFuncMap.insert("SetTRIGCmd", &DM1Protocol::encodeSetTRIGCmd);
+
+    /* id:130~139 */
+    m_encodeFuncMap.insert("SetIODO", &DM1Protocol::encodeSetIODO);
+    m_encodeFuncMap.insert("GetIODO", &DM1Protocol::encodeGetIODO);
+    m_encodeFuncMap.insert("GetIODI", &DM1Protocol::encodeGetIODI);
+    m_encodeFuncMap.insert("GetIOADC", &DM1Protocol::encodeGetIOADC);
+
+    /* id:200~211 */
+    m_encodeFuncMap.insert("SetSafeModeEnabled", &DM1Protocol::encodeSetSafeModeEnabled);
+    m_encodeFuncMap.insert("GetSafeModeEnabled", &DM1Protocol::encodeGetSafeModeEnabled);
+    m_encodeFuncMap.insert("SetCollisionThreshold", &DM1Protocol::encodeSetCollisionThreshold);
+    m_encodeFuncMap.insert("GetCollisionThreshold", &DM1Protocol::encodeGetCollisionThreshold);
+    m_encodeFuncMap.insert("SetLoadParams", &DM1Protocol::encodeSetLoadParams);
+    m_encodeFuncMap.insert("GetLoadParams", &DM1Protocol::encodeGetLoadParams);
+    m_encodeFuncMap.insert("SetSafeStrategy", &DM1Protocol::encodeSetSafeStrategy);
+    m_encodeFuncMap.insert("GetSafeStrategy", &DM1Protocol::encodeGetSafeStrategy);
+    m_encodeFuncMap.insert("SetSafeGuardMode", &DM1Protocol::encodeSetSafeGuardMode);
+    m_encodeFuncMap.insert("GetSafeGuardMode", &DM1Protocol::encodeGetSafeGuardMode);
+    m_encodeFuncMap.insert("GetSafeGuardStatus", &DM1Protocol::encodeGetSafeGuardStatus);
+
+    /* id:240~247 */
+    m_encodeFuncMap.insert("QueuedCmdStart", &DM1Protocol::encodeSetQueuedCmdStart);
+    m_encodeFuncMap.insert("QueuedCmdStop", &DM1Protocol::encodeSetQueuedCmdStop);
+    m_encodeFuncMap.insert("QueuedCmdForceStop", &DM1Protocol::encodeSetQueuedCmdForceStop);
+    m_encodeFuncMap.insert("QueuedCmdStartDownload", &DM1Protocol::encodeSetQueuedCmdStartDownload);
+    m_encodeFuncMap.insert("QueuedCmdStopDownload", &DM1Protocol::encodeSetQueuedCmdStopDownload);
+    m_encodeFuncMap.insert("QueuedCmdClear", &DM1Protocol::encodeSetQueuedCmdClear);
+    m_encodeFuncMap.insert("GetQueuedCmdCurrentIndex", &DM1Protocol::encodeGetQueuedCmdCurrentIndex);
+    m_encodeFuncMap.insert("GetQueuedCmdLeftSpace", &DM1Protocol::encodeGetQueuedCmdLeftSpace);
+}
+
+void DM1Protocol::_parseFunctionInit()
+{
+    m_parseFuncMap.insert(0, &DM1Protocol::parseDeviceSN);
+    m_parseFuncMap.insert(1, &DM1Protocol::parseDeviceName);
+    m_parseFuncMap.insert(2, &DM1Protocol::parseDeviceVersion);
+    m_parseFuncMap.insert(5, &DM1Protocol::parseHardwareVersion);
+
+    m_parseFuncMap.insert(10, &DM1Protocol::parsePose);
+    m_parseFuncMap.insert(11, &DM1Protocol::parseResetPose);
+
+    m_parseFuncMap.insert(20, &DM1Protocol::parseAlarmState);
+
+    m_parseFuncMap.insert(31, &DM1Protocol::parseHOMECmd);
+    m_parseFuncMap.insert(34, &DM1Protocol::parseHOMEInitialPos);
+
+    m_parseFuncMap.insert(40, &DM1Protocol::parseHHTTrigMode);
+    m_parseFuncMap.insert(41, &DM1Protocol::parseHHTTrigOutputEnabled);
+    m_parseFuncMap.insert(42, &DM1Protocol::parseHHTTrigOutput);
+
+    m_parseFuncMap.insert(50, &DM1Protocol::parseArmOrientation);
+
+    m_parseFuncMap.insert(60, &DM1Protocol::parseEndEffectorParams);
+    m_parseFuncMap.insert(61, &DM1Protocol::parseEndEffectorLaser);
+
+    m_parseFuncMap.insert(70, &DM1Protocol::parseJOGJointParams);
+    m_parseFuncMap.insert(71, &DM1Protocol::parseJOGCoordinateParams);
+    m_parseFuncMap.insert(72, &DM1Protocol::parseJOGCommonParams);
+    m_parseFuncMap.insert(73, &DM1Protocol::parseJOGCmd);
+
+    m_parseFuncMap.insert(75, &DM1Protocol::parseInchMode);
+    m_parseFuncMap.insert(76, &DM1Protocol::parseInchParam);
+
+    m_parseFuncMap.insert(80, &DM1Protocol::parsePTPJointParams);
+    m_parseFuncMap.insert(81, &DM1Protocol::parsePTPCoordinateParams);
+    m_parseFuncMap.insert(82, &DM1Protocol::parsePTPJumpParams);
+    m_parseFuncMap.insert(83, &DM1Protocol::parsePTPCommonParams);
+    m_parseFuncMap.insert(84, &DM1Protocol::parsePTPCmd);
+
+    m_parseFuncMap.insert(90, &DM1Protocol::parseCPParams);
+    m_parseFuncMap.insert(91, &DM1Protocol::parseCPCmd);
+    m_parseFuncMap.insert(92, &DM1Protocol::parseCPLECmd);
+
+    m_parseFuncMap.insert(100, &DM1Protocol::parseARCParams);
+    m_parseFuncMap.insert(101, &DM1Protocol::parseARCCmd);
+    m_parseFuncMap.insert(102, &DM1Protocol::parseCircleCmd);
+
+    m_parseFuncMap.insert(110, &DM1Protocol::parseWAITCmd);
+
+    m_parseFuncMap.insert(120, &DM1Protocol::parseTRIGCmd);
+
+    m_parseFuncMap.insert(131, &DM1Protocol::parseIODO);
+
+    m_parseFuncMap.insert(133, &DM1Protocol::parseIODI);
+    m_parseFuncMap.insert(134, &DM1Protocol::parseIOADC);
+
+    m_parseFuncMap.insert(200, &DM1Protocol::parseSafeModeEnabled);
+    m_parseFuncMap.insert(201, &DM1Protocol::parseCollisionThreshold);
+    m_parseFuncMap.insert(203, &DM1Protocol::parseLoadParams);
+    m_parseFuncMap.insert(208, &DM1Protocol::parseSafeStrategy);
+    m_parseFuncMap.insert(210, &DM1Protocol::parseSafeGuardMode);
+    m_parseFuncMap.insert(211, &DM1Protocol::parseSafeGuardStatus);
+
+    m_parseFuncMap.insert(240, &DM1Protocol::parseQueuedCmdStart);
+    m_parseFuncMap.insert(241, &DM1Protocol::parseQueuedCmdStop);
+    m_parseFuncMap.insert(242, &DM1Protocol::parseQueuedCmdForceStop);
+    m_parseFuncMap.insert(243, &DM1Protocol::parseQueuedCmdStartDownload);
+    m_parseFuncMap.insert(244, &DM1Protocol::parseQueuedCmdStopDownload);
+    m_parseFuncMap.insert(245, &DM1Protocol::parseQueuedCmdClear);
+    m_parseFuncMap.insert(246, &DM1Protocol::parseQueuedCmdCurrentIndex);
+    m_parseFuncMap.insert(247, &DM1Protocol::parseQueuedCmdLeftSpace);
+}
+
+QJsonObject DM1Protocol::addQueueIndexInfo(QJsonObject &resObj, QByteArray &params)
+{
+    if (params.size() == sizeof (quint64)) {
+        quint64 queuedCmdIndex = 0;
+        memcpy(&queuedCmdIndex, params, sizeof (quint64));
+
+        QJsonObject paramsObj;
+        paramsObj.insert("queuedCmdIndex", static_cast<double>(queuedCmdIndex));
+        resObj.insert("params", paramsObj);
+    }
+    return resObj;
+}
+
+const QStringList DM1Protocol::getCommandList()
+{
+    return m_encodeFuncMap.keys();
+}
+
+QJsonObject DM1Protocol::parseParams(PacketPayload &payload)
+{
+    QJsonObject resObj;
+
+    ParseFunction function = m_parseFuncMap.value(payload.p_cmdID);
+
+    if (function) {
+        resObj = (this->*function)(payload.p_ctrl.c_rw, payload.p_params);
+    } else {
+        qDebug() << "No matching parseParams function.";
+    }
+    return resObj;
+}
+
+bool DM1Protocol::setPayload(QString cmd, PacketPayload &payload, QJsonObject params)
+{
+    QByteArray res;
+
+    EncodeFun function = m_encodeFuncMap.value(cmd);
+    if (function) {
+        (this->*function)(payload, params);
+        return true;
+    } else {
+        qDebug() << "No matching encode function with: " << cmd << " params:" << params;
+    }
+    return false;
+}
+
+/* *** Parse Function *** Parse Function *** Parse Function *** Parse Function *** */
+/* *** Parse Function *** Parse Function *** Parse Function *** Parse Function *** */
+
+
+//![0]
+QJsonObject DM1Protocol::parseDeviceSN(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetDeviceSN");
+    } else {
+        resObj.insert("cmd", "SetDeviceSN");
+    }
+
+    if (params.size() > 0) {
+        char *sn = params.data();
+
+        QJsonObject paramsObj;
+        paramsObj.insert("deviceSN", sn);
+        resObj.insert("params", paramsObj);
+    }
+    return resObj;
+}
+
+//![1]
+QJsonObject DM1Protocol::parseDeviceName(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetDeviceName");
+    } else {
+        resObj.insert("cmd", "SetDeviceName");
+    }
+
+    if (params.size() > 0) {
+        char *devName = params.data();
+
+        QJsonObject paramsObj;
+        paramsObj.insert("deviceName", devName);
+        resObj.insert("params", paramsObj);
+    }
+    return resObj;
+}
+
+//![2]
+QJsonObject DM1Protocol::parseDeviceVersion(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetDeviceVersion");
+    }
+
+    if (params.size() > 3) {
+        quint8 typeIndex = 0, majorVersion = 0, minorVersion = 0, revision = 0;
+        QDataStream out(&params, QIODevice::ReadOnly);
+        out >> typeIndex >> majorVersion >> minorVersion >> revision;
+
+        QJsonObject paramsObj;
+        paramsObj.insert("type", typeIndex);
+        paramsObj.insert("majorVersion", majorVersion);
+        paramsObj.insert("minorVersion", minorVersion);
+        paramsObj.insert("revision", revision);
+        resObj.insert("params", paramsObj);
+    }
+    return resObj;
+}
+
+//![5]
+QJsonObject DM1Protocol::parseHardwareVersion(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetHardwareVersion");
+    }
+
+    if (params.size() == 12 * 11 * sizeof (char)) {
+        QJsonObject paramsObj;
+        paramsObj.insert("machineNum", params.mid(0, 11).data());
+        paramsObj.insert("mainBoard", params.mid(11, 11).data());
+        paramsObj.insert("driverRearArm", params.mid(22, 11).data());
+        paramsObj.insert("driverFrontArm", params.mid(33, 11).data());
+        paramsObj.insert("driverZArm", params.mid(44, 11).data());
+        paramsObj.insert("driverRArm", params.mid(55, 11).data());
+        paramsObj.insert("encoderRearArm", params.mid(66, 11).data());
+        paramsObj.insert("encoderFrontArm", params.mid(77, 11).data());
+        paramsObj.insert("encoderZArm", params.mid(88, 11).data());
+        paramsObj.insert("encoderRArm", params.mid(99, 11).data());
+        paramsObj.insert("brakeBoard", params.mid(120, 11).data());
+        paramsObj.insert("endIOBoard", params.mid(131, 11).data());
+        resObj.insert("params", paramsObj);
+    }
+    return resObj;
+}
+
+//![10]
+QJsonObject DM1Protocol::parsePose(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetPose");
+    }
+
+    if (params.size() == sizeof (PoseStruct)) {
+        PoseStruct pose;
+        memcpy(&pose, params, sizeof (PoseStruct));
+
+        QJsonObject paramsObj;
+        paramsObj.insert("x", static_cast<double>(pose.x));
+        paramsObj.insert("y", static_cast<double>(pose.y));
+        paramsObj.insert("z", static_cast<double>(pose.z));
+        paramsObj.insert("r", static_cast<double>(pose.r));
+
+        QJsonArray jointAngleArray;
+        for (int i = 0; i < 4; ++i) {
+            jointAngleArray.append(static_cast<double>(pose.jointAngle[i]));
+        }
+        paramsObj.insert("jointAngle", jointAngleArray);
+        resObj.insert("params", paramsObj);
+    }
+    return resObj;
+}
+
+//![11]
+QJsonObject DM1Protocol::parseResetPose(quint8 rw, QByteArray params)
+{
+    Q_UNUSED(params)
+
+    QJsonObject resObj;
+
+    if (rw == 1) {
+        resObj.insert("cmd", "ResetPose");
+    }
+    return resObj;
+}
+
+//![20]
+QJsonObject DM1Protocol::parseAlarmState(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetAlarmsState");
+    } else {
+        resObj.insert("cmd", "ClearAllAlarmsState");
+    }
+
+    if (params.size() > 0) {
+        QDataStream out(&params, QIODevice::ReadOnly);
+
+        QJsonArray stateArr;
+        for (int i = 0; i < params.size(); ++i) {
+            quint8 state = 0;
+            out >> state;
+            stateArr.append(state);
+        }
+
+        QJsonObject paramsObj;
+        paramsObj.insert("state", stateArr);
+        resObj.insert("params", paramsObj);
+    }
+    return resObj;
+}
+
+//![31]
+QJsonObject DM1Protocol::parseHOMECmd(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 1) {
+        resObj.insert("cmd", "SetHOMECmd");
+    }
+
+    if (params.size() == sizeof (quint64)) {
+        addQueueIndexInfo(resObj, params);
+    }
+    return resObj;
+}
+
+//![34]
+QJsonObject DM1Protocol::parseHOMEInitialPos(quint8 rw, QByteArray params)
+{
+    Q_UNUSED(params)
+
+    QJsonObject resObj;
+
+    if (rw == 1) {
+        resObj.insert("cmd", "SetHOMEInitialPos");
+    }
+    return resObj;
+}
+
+//![40]
+QJsonObject DM1Protocol::parseHHTTrigMode(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetHHTTrigMode");
+    } else {
+        resObj.insert("cmd", "SetHHTTrigMode");
+    }
+
+    if(params.size() > 0){
+        quint8 mode = 0;
+        memcpy(&mode, params, sizeof (quint8));
+
+        QJsonObject paramsObj;
+        paramsObj.insert("mode", mode);
+        resObj.insert("params", paramsObj);
+    }
+    return resObj;
+}
+
+//![41]
+QJsonObject DM1Protocol::parseHHTTrigOutputEnabled(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetHHTTrigOutputEnabled");
+    } else {
+        resObj.insert("cmd", "SetHHTTrigOutputEnabled");
+    }
+
+    if (params.size() == sizeof (quint8)) {
+        quint8 isEnabled = 0;
+        memcpy(&isEnabled, params, sizeof (quint8));
+
+        QJsonObject paramsObj;
+        paramsObj.insert("isEnabled", isEnabled > 0 ? true : false);
+        resObj.insert("params", paramsObj);
+    }
+    return resObj;
+}
+
+//![42]
+QJsonObject DM1Protocol::parseHHTTrigOutput(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetHHTTrigOutput");
+    }
+
+    if (params.size() == sizeof (quint8)) {
+        quint8 isTriggered;
+        memcpy(&isTriggered, params, sizeof (quint8));
+
+        QJsonObject paramsObj;
+        paramsObj.insert("isTriggered", isTriggered > 0 ? true : false);
+        resObj.insert("params", paramsObj);
+    }
+    return resObj;
+}
+
+//![50]
+QJsonObject DM1Protocol::parseArmOrientation(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetArmOrientation");
+    } else {
+        resObj.insert("cmd", "SetArmOrientation");
+    }
+
+    if (params.size() == sizeof (quint8)) {
+        quint8 armOrientation = 0;
+        memcpy(&armOrientation, params, sizeof (quint8));
+
+        QJsonObject paramsObj;
+        paramsObj.insert("armOrientation", armOrientation);
+        resObj.insert("params", paramsObj);
+    } else if (params.size() == sizeof (quint64)) {
+        addQueueIndexInfo(resObj, params);
+    }
+    return resObj;
+}
+
+//![60]
+QJsonObject DM1Protocol::parseEndEffectorParams(quint8 rw, QByteArray params)
+{
+    struct CoordinateOffsetStruct {
+        float xOffset;
+        float yOffset;
+        float zOffset;
+    };
+
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetEndEffectorParams");
+    } else {
+        resObj.insert("cmd", "SetEndEffectorParams");
+    }
+
+    if (params.size() == sizeof (CoordinateOffsetStruct)) {
+        CoordinateOffsetStruct coordinateOffset;
+        memcpy(&coordinateOffset, params, sizeof (CoordinateOffsetStruct));
+
+        QJsonObject paramsObj;
+        paramsObj.insert("xOffset", static_cast<double>(coordinateOffset.xOffset));
+        paramsObj.insert("yOffset", static_cast<double>(coordinateOffset.yOffset));
+        paramsObj.insert("zOffset", static_cast<double>(coordinateOffset.zOffset));
+        resObj.insert("params", paramsObj);
+    } else if (params.size() == sizeof (quint64)) {
+        addQueueIndexInfo(resObj, params);
+    }
+    return resObj;
+}
+
+//![61]
+QJsonObject DM1Protocol::parseEndEffectorLaser(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetEndEffectorLaser");
+    } else {
+        resObj.insert("cmd", "SetEndEffectorLaser");
+    }
+
+    if (params.size() == 2 * sizeof (quint8)) {
+        quint8 isEnabled = 0, isOn = 0;
+        QDataStream out(&params, QIODevice::ReadOnly);
+        out >> isEnabled >> isOn;
+
+        QJsonObject paramsObj;
+        paramsObj.insert("isEnabled", isEnabled > 0 ? true : false);
+        paramsObj.insert("isOn", isOn > 0 ? true : false);
+        resObj.insert("params", paramsObj);
+    } else if (params.size() == sizeof (quint64)) {
+        addQueueIndexInfo(resObj, params);
+    }
+    return resObj;
+}
+
+//![70]
+QJsonObject DM1Protocol::parseJOGJointParams(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetJOGJointParams");
+    } else {
+        resObj.insert("cmd", "SetJOGJointParams");
+    }
+
+    if (params.size() == sizeof (VelocityArrayStruct)) {
+        VelocityArrayStruct JOGLParams;
+        memcpy(&JOGLParams, params, sizeof (VelocityArrayStruct));
+
+        QJsonArray velocityArray, accelerationArray;
+        for (int i = 0; i < 4; ++i) {
+            velocityArray.append(static_cast<double>(JOGLParams.velocity[i]));
+            accelerationArray.append(static_cast<double>(JOGLParams.acceleration[i]));
+        }
+
+        QJsonObject paramsObj;
+        paramsObj.insert("velocity", velocityArray);
+        paramsObj.insert("acceleration", accelerationArray);
+        resObj.insert("params", paramsObj);
+    } else if (params.size() == sizeof (quint64)) {
+        addQueueIndexInfo(resObj, params);
+    }
+    return resObj;
+}
+
+//![71]
+QJsonObject DM1Protocol::parseJOGCoordinateParams(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetJOGCoordinateParams");
+    } else {
+        resObj.insert("cmd", "SetJOGCoordinateParams");
+    }
+
+    if (params.size() == sizeof (VelocityArrayStruct)) {
+        VelocityArrayStruct jogCoordinateParams;
+        memcpy(&jogCoordinateParams, params, sizeof (VelocityArrayStruct));
+
+        QJsonArray velocityArray, accelerationArray;
+        for (int i = 0; i < 4; ++i) {
+            velocityArray.append(static_cast<double>(jogCoordinateParams.velocity[i]));
+            accelerationArray.append(static_cast<double>(jogCoordinateParams.acceleration[i]));
+        }
+
+        QJsonObject paramsObj;
+        paramsObj.insert("velocity", velocityArray);
+        paramsObj.insert("acceleration", accelerationArray);
+        resObj.insert("params", paramsObj);
+    } else if (params.size() == sizeof (quint64)) {
+        addQueueIndexInfo(resObj, params);
+    }
+    return resObj;
+}
+
+//![72]
+QJsonObject DM1Protocol::parseJOGCommonParams(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetJOGCommonParams");
+    } else {
+        resObj.insert("cmd", "SetJOGCommonParams");
+    }
+
+    if (params.size() == sizeof (VelocityRatioStruct)) {
+        VelocityRatioStruct jogParams;
+        memcpy(&jogParams, params, sizeof (VelocityRatioStruct));
+
+        QJsonObject paramsObj;
+        paramsObj.insert("velocityRatio", static_cast<double>(jogParams.velocityRatio));
+        paramsObj.insert("accelerationRatio", static_cast<double>(jogParams.accelerationRatio));
+        resObj.insert("params", paramsObj);
+    } else if (params.size() == sizeof (quint64)) {
+        addQueueIndexInfo(resObj, params);
+    }
+    return resObj;
+}
+
+//![73]
+QJsonObject DM1Protocol::parseJOGCmd(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 1) {
+        resObj.insert("cmd", "SetJOGCmd");
+    }
+
+    if (params.size() == sizeof (quint64)) {
+        addQueueIndexInfo(resObj, params);
+    }
+    return resObj;
+}
+
+//![75]
+QJsonObject DM1Protocol::parseInchMode(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetInchMode");
+    } else {
+        resObj.insert("cmd", "SetInchMode");
+    }
+
+    if (params.size() == sizeof (quint8)) {
+        quint8 mode;
+        memcpy(&mode, params, sizeof (quint8));
+
+        QJsonObject paramsObj;
+        paramsObj.insert("mode", mode);
+        resObj.insert("params", paramsObj);
+    }
+    return resObj;
+}
+
+//![76]
+QJsonObject DM1Protocol::parseInchParam(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetInchParam");
+    } else {
+        resObj.insert("cmd", "SetInchParam");
+    }
+
+    if (params.size() == sizeof (InchParamsStruct)) {
+        InchParamsStruct inchParams;
+        memcpy(&inchParams, params, sizeof (InchParamsStruct));
+
+        QJsonObject paramsObj;
+        paramsObj.insert("distanceMM", static_cast<double>(inchParams.distanceMM));
+        paramsObj.insert("distanceANG", static_cast<double>(inchParams.distanceANG));
+        resObj.insert("params", paramsObj);
+    }
+    return resObj;
+}
+
+//![80]
+QJsonObject DM1Protocol::parsePTPJointParams(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetPTPJointParams");
+    } else {
+        resObj.insert("cmd", "SetPTPJointParams");
+    }
+
+    if (params.size() == sizeof (VelocityArrayStruct)) {
+        VelocityArrayStruct ptpJointParams;
+        memcpy(&ptpJointParams, params, sizeof (VelocityArrayStruct));
+
+        QJsonArray velocityArray, accelerationArray;
+        for(int i = 0; i < 4; i++) {
+            velocityArray.append(static_cast<double>(ptpJointParams.velocity[i]));
+            accelerationArray.append(static_cast<double>(ptpJointParams.acceleration[i]));
+        }
+
+        QJsonObject paramsObj;
+        paramsObj.insert("velocity", velocityArray);
+        paramsObj.insert("acceleration", accelerationArray);
+        resObj.insert("params", paramsObj);
+    } else if (params.size() == sizeof (quint64)) {
+        addQueueIndexInfo(resObj, params);
+    }
+    return resObj;
+}
+
+//![81]
+QJsonObject DM1Protocol::parsePTPCoordinateParams(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetPTPCoordinateParams");
+    } else {
+        resObj.insert("cmd", "SetPTPCoordinateParams");
+    }
+
+    if (params.size() == sizeof (PTPCoordinateParamsStruct)) {
+        PTPCoordinateParamsStruct ptpCoordinateParams;
+        memcpy(&ptpCoordinateParams, params, sizeof (PTPCoordinateParamsStruct));
+
+        QJsonObject paramsObj;
+        paramsObj.insert("xyzVelocity", static_cast<double>(ptpCoordinateParams.xyzVelocity));
+        paramsObj.insert("rVelocity", static_cast<double>(ptpCoordinateParams.rVelocity));
+        paramsObj.insert("xyzAcceleration", static_cast<double>(ptpCoordinateParams.xyzAcceleration));
+        paramsObj.insert("rAcceleration", static_cast<double>(ptpCoordinateParams.rAcceleration));
+        resObj.insert("params", paramsObj);
+    } else if (params.size() == sizeof (quint64)) {
+        addQueueIndexInfo(resObj, params);
+    }
+    return resObj;
+}
+
+//![82]
+QJsonObject DM1Protocol::parsePTPJumpParams(quint8 rw, QByteArray params)
+{
+    struct PTPJumpParamsStruct {
+        float jumpHeight;
+        float zLimit;
+    };
+
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetPTPJumpParams");
+    } else {
+        resObj.insert("cmd", "SetPTPJumpParams");
+    }
+
+    if (params.size() == sizeof (PTPJumpParamsStruct)) {
+        PTPJumpParamsStruct ptpParams;
+        memcpy(&ptpParams, params, sizeof (PTPJumpParamsStruct));
+
+        QJsonObject paramsObj;
+        paramsObj.insert("jumpHeight", static_cast<double>(ptpParams.jumpHeight));
+        paramsObj.insert("zLimit", static_cast<double>(ptpParams.zLimit));
+        resObj.insert("params", paramsObj);
+    } else if (params.size() == sizeof (quint64)) {
+        addQueueIndexInfo(resObj, params);
+    }
+    return resObj;
+}
+
+//![83]
+QJsonObject DM1Protocol::parsePTPCommonParams(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetPTPCommonParams");
+    } else {
+        resObj.insert("cmd", "SetPTPCommonParams");
+    }
+
+    if (params.size() == sizeof (VelocityRatioStruct)) {
+        VelocityRatioStruct ptpParams;
+        memcpy(&ptpParams, params, sizeof (VelocityRatioStruct));
+
+        QJsonObject paramsObj;
+        paramsObj.insert("velocityRatio", static_cast<double>(ptpParams.velocityRatio));
+        paramsObj.insert("accelerationRatio", static_cast<double>(ptpParams.accelerationRatio));
+        resObj.insert("params", paramsObj);
+    } else if (params.size() == sizeof (quint64)) {
+        addQueueIndexInfo(resObj, params);
+    }
+    return resObj;
+}
+
+//![84]
+QJsonObject DM1Protocol::parsePTPCmd(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 1) {
+        resObj.insert("cmd", "SetPTPCmd");
+    }
+
+    if (params.size() == sizeof (quint64)) {
+        addQueueIndexInfo(resObj, params);
+    }
+    return resObj;
+}
+
+//![90]
+QJsonObject DM1Protocol::parseCPParams(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetCPParams");
+    } else {
+        resObj.insert("cmd", "SetCPParams");
+    }
+
+    if (params.size() == sizeof (CPParamsStruct)) {
+        CPParamsStruct cpParams;
+        memcpy(&cpParams, params, sizeof (CPParamsStruct));
+
+        QJsonObject paramsObj;
+        paramsObj.insert("targetAcc", static_cast<double>(cpParams.targetAcc));
+        paramsObj.insert("junctionVel", static_cast<double>(cpParams.junctionVel));
+
+        if (cpParams.realTimeTrack > 0) {
+            paramsObj.insert("period", static_cast<double>(cpParams.acc));
+            paramsObj.insert("isRealTimeTrack", static_cast<quint8>(cpParams.realTimeTrack));
+        } else {
+            paramsObj.insert("acc", static_cast<double>(cpParams.acc));
+            paramsObj.insert("isRealTimeTrack", static_cast<quint8>(cpParams.realTimeTrack));
+        }
+        resObj.insert("params", paramsObj);
+    } else if (params.size() == sizeof (quint64)) {
+        addQueueIndexInfo(resObj, params);
+    }
+    return resObj;
+}
+
+//![91]
+QJsonObject DM1Protocol::parseCPCmd(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 1) {
+        resObj.insert("cmd", "SetCPCmd");
+    }
+
+    if (params.size() == sizeof (quint64)) {
+        addQueueIndexInfo(resObj, params);
+    }
+    return resObj;
+}
+
+//![92]
+QJsonObject DM1Protocol::parseCPLECmd(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 1) {
+        resObj.insert("cmd", "SetCPLECmd");
+    }
+
+    if (params.size() == sizeof (quint64)) {
+        addQueueIndexInfo(resObj, params);
+    }
+    return resObj;
+}
+
+//![100]
+QJsonObject DM1Protocol::parseARCParams(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetARCParams");
+    } else {
+        resObj.insert("cmd", "SetARCParams");
+    }
+
+    if (params.size() == sizeof (ARCParamsStruct)) {
+        ARCParamsStruct arcParams;
+        memcpy(&arcParams, params, sizeof (ARCParamsStruct));
+
+        QJsonObject paramsObj;
+        paramsObj.insert("xyzVelocity", static_cast<double>(arcParams.xyzVelocity));
+        paramsObj.insert("rVelocity", static_cast<double>(arcParams.rVelocity));
+        paramsObj.insert("xyzAcceleration", static_cast<double>(arcParams.xyzAcceleration));
+        paramsObj.insert("rAcceleration", static_cast<double>(arcParams.rAcceleration));
+        resObj.insert("params", paramsObj);
+    } else if (params.size() == sizeof (quint64)) {
+        addQueueIndexInfo(resObj, params);
+    }
+    return resObj;
+}
+
+//![101]
+QJsonObject DM1Protocol::parseARCCmd(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 1) {
+        resObj.insert("cmd", "SetARCCmd");
+    }
+
+    if (params.size() == sizeof (quint64)) {
+        addQueueIndexInfo(resObj, params);
+    }
+    return resObj;
+}
+
+//![102]
+QJsonObject DM1Protocol::parseCircleCmd(quint8 rw, QByteArray params)
+{
+    Q_UNUSED(params)
+
+    QJsonObject resObj;
+
+    if (rw == 1) {
+        resObj.insert("cmd", "SetCircleCmd");
+    }
+    return resObj;
+}
+
+//![110]
+QJsonObject DM1Protocol::parseWAITCmd(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 1) {
+        resObj.insert("cmd", "SetWAITCmd");
+    }
+
+    if (params.size() == sizeof (quint64)) {
+        addQueueIndexInfo(resObj, params);
+    }
+    return resObj;
+}
+
+//![120]
+QJsonObject DM1Protocol::parseTRIGCmd(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 1) {
+        resObj.insert("cmd", "SetTRIGCmd");
+    }
+
+    if (params.size() == sizeof (quint64)) {
+        addQueueIndexInfo(resObj, params);
+    }
+    return resObj;
+}
+
+//![131]
+QJsonObject DM1Protocol::parseIODO(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetIODO");
+    } else {
+        resObj.insert("cmd", "SetIODO");
+    }
+
+    if (params.size() == 2 * sizeof (quint8)) {
+        quint8 port = 0, level = 0;
+        QDataStream out(&params, QIODevice::ReadOnly);
+        out >> port >> level;
+
+        QJsonObject paramsObj;
+        paramsObj.insert("port", port);
+        paramsObj.insert("level", level);
+        resObj.insert("params", paramsObj);
+    } else if (params.size() == sizeof (quint64)) {
+        addQueueIndexInfo(resObj, params);
+    }
+    return resObj;
+}
+
+//![133]
+QJsonObject DM1Protocol::parseIODI(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetIODI");
+    }
+
+    if (params.size() == 2 * sizeof (quint8)) {
+        quint8 port = 0, level = 0;
+        QDataStream out(&params, QIODevice::ReadOnly);
+        out >> port >> level;
+
+        QJsonObject paramsObj;
+        paramsObj.insert("port", port);
+        paramsObj.insert("level", level);
+        resObj.insert("params", paramsObj);
+    }
+    return resObj;
+}
+
+//![134]
+QJsonObject DM1Protocol::parseIOADC(quint8 rw, QByteArray params)
+{
+#pragma pack(push, 1)
+    struct IOADCStruct {
+        quint8 port;
+        quint16 value;
+    };
+#pragma pack(pop)
+
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetIOADC");
+    }
+
+    if (params.size() == sizeof (IOADCStruct)) {
+        IOADCStruct ioadc;
+        memcpy(&ioadc, params, sizeof (IOADCStruct));
+
+        QJsonObject paramsObj;
+        paramsObj.insert("port", ioadc.port);
+        paramsObj.insert("value", ioadc.value);
+        resObj.insert("params", paramsObj);
+    }
+    return resObj;
+}
+
+//![200]
+QJsonObject DM1Protocol::parseSafeModeEnabled(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetSafeModeEnabled");
+    } else {
+        resObj.insert("cmd", "SetSafeModeEnabled");
+    }
+
+    if (params.size() == sizeof (quint8)) {
+        quint8 enabled = 0;
+        memcpy(&enabled, params, sizeof (quint8));
+
+        QJsonObject paramsObj;
+        paramsObj.insert("isEnabled", enabled > 0 ? true : false);
+        resObj.insert("params", paramsObj);
+    }
+    return resObj;
+}
+
+//![201]
+QJsonObject DM1Protocol::parseCollisionThreshold(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetCollisionThreshold");
+    } else {
+        resObj.insert("cmd", "SetCollisionThreshold");
+    }
+
+    if (params.size() == sizeof (TorDiffParamsStruct)) {
+        TorDiffParamsStruct torDiffParams;
+        memcpy(&torDiffParams, params, sizeof (TorDiffParamsStruct));
+
+        QJsonObject paramsObj;
+        paramsObj.insert("torDiffJ1", static_cast<double>(torDiffParams.torDiffJ1));
+        paramsObj.insert("torDiffJ2", static_cast<double>(torDiffParams.torDiffJ2));
+        paramsObj.insert("torDiffJ3", static_cast<double>(torDiffParams.torDiffJ3));
+        paramsObj.insert("torDiffJ4", static_cast<double>(torDiffParams.torDiffJ4));
+        resObj.insert("params", paramsObj);
+    }
+    return resObj;
+}
+
+//![203]
+QJsonObject DM1Protocol::parseLoadParams(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetLoadParams");
+    } else {
+        resObj.insert("cmd", "SetLoadParams");
+    }
+
+    if (params.size() == sizeof (float)) {
+        float loadParams;
+        memcpy(&loadParams, params, sizeof (float));
+
+        QJsonObject paramsObj;
+        paramsObj.insert("loadParams", static_cast<double>(loadParams));
+        resObj.insert("params", paramsObj);
+    }
+    return resObj;
+}
+
+//![208]
+QJsonObject DM1Protocol::parseSafeStrategy(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetSafeStrategy");
+    } else {
+        resObj.insert("cmd", "SetSafeStrategy");
+    }
+
+    if (params.size() == sizeof (quint8)) {
+        quint8 mode;
+        memcpy(&mode, params, sizeof (quint8));
+
+        QJsonObject paramsObj;
+        paramsObj.insert("mode", static_cast<double>(mode));
+        resObj.insert("params", paramsObj);
+    }
+    return resObj;
+}
+
+//![210]
+QJsonObject DM1Protocol::parseSafeGuardMode(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetSafeGuardMode");
+    } else {
+        resObj.insert("cmd", "SetSafeGuardMode");
+    }
+
+    if (params.size() == sizeof (quint8)) {
+        quint8 mode;
+        memcpy(&mode, params, sizeof (quint8));
+
+        QJsonObject paramsObj;
+        paramsObj.insert("mode", static_cast<double>(mode));
+        resObj.insert("params", paramsObj);
+    }
+    return resObj;
+}
+
+//![211]
+QJsonObject DM1Protocol::parseSafeGuardStatus(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetSafeGuardStatus");
+    }
+
+    if (params.size() == sizeof (quint8)) {
+        quint8 status;
+        memcpy(&status, params, sizeof (quint8));
+
+        QJsonObject paramsObj;
+        paramsObj.insert("status", static_cast<double>(status));
+        resObj.insert("params", paramsObj);
+    }
+    return resObj;
+}
+
+//![240]
+QJsonObject DM1Protocol::parseQueuedCmdStart(quint8 rw, QByteArray params)
+{
+    Q_UNUSED(params)
+
+    QJsonObject resObj;
+
+    if (rw == 1) {
+        resObj.insert("cmd", "QueuedCmdStart");
+    }
+    return resObj;
+}
+
+//![241]
+QJsonObject DM1Protocol::parseQueuedCmdStop(quint8 rw, QByteArray params)
+{
+    Q_UNUSED(params)
+
+    QJsonObject resObj;
+
+    if (rw == 1) {
+        resObj.insert("cmd", "QueuedCmdStop");
+    }
+    return resObj;
+}
+
+//![242]
+QJsonObject DM1Protocol::parseQueuedCmdForceStop(quint8 rw, QByteArray params)
+{
+    Q_UNUSED(params)
+
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "QueuedCmdForceStop");
+    }
+    return resObj;
+}
+
+//![243]
+QJsonObject DM1Protocol::parseQueuedCmdStartDownload(quint8 rw, QByteArray params)
+{
+    Q_UNUSED(params)
+
+    QJsonObject resObj;
+
+    if (rw == 1) {
+        resObj.insert("cmd", "QueuedCmdStartDownload");
+    }
+    return resObj;
+}
+
+//![244]
+QJsonObject DM1Protocol::parseQueuedCmdStopDownload(quint8 rw, QByteArray params)
+{
+    Q_UNUSED(params)
+
+    QJsonObject resObj;
+
+    if (rw == 1) {
+        resObj.insert("cmd", "QueuedCmdStopDownload");
+    }
+    return resObj;
+}
+
+//![245]
+QJsonObject DM1Protocol::parseQueuedCmdClear(quint8 rw, QByteArray params)
+{
+    Q_UNUSED(params)
+
+    QJsonObject resObj;
+
+    if (rw == 1) {
+        resObj.insert("cmd", "QueuedCmdClear");
+    }
+    return resObj;
+}
+
+//![246]
+QJsonObject DM1Protocol::parseQueuedCmdCurrentIndex(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetQueuedCmdCurrentIndex");
+    }
+
+    if (params.size() == sizeof (quint64)) {
+        addQueueIndexInfo(resObj, params);
+    }
+    return resObj;
+}
+
+//![247]
+QJsonObject DM1Protocol::parseQueuedCmdLeftSpace(quint8 rw, QByteArray params)
+{
+    QJsonObject resObj;
+
+    if (rw == 0) {
+        resObj.insert("cmd", "GetQueuedCmdLeftSpace");
+    }
+
+    if (params.size() == sizeof (quint32)) {
+        quint32 leftSpace = 0;
+        memcpy(&leftSpace, params, sizeof (quint32));
+
+        QJsonObject paramsObj;
+        paramsObj.insert("leftSpace", static_cast<double>(leftSpace));
+        resObj.insert("params", paramsObj);
+    }
+    return resObj;
+}
+
+
+/**********************************************************************************
+ * *** encode *** encode *** encode *** encode *** encode *** encode *** encode ***
+ *********************************************************************************/
+
+
+/* 设备信息 */
+//! [0]
+void DM1Protocol::encodeSetDeviceSN(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 0;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("deviceSN")) {
+        qDebug() << "'deviceSN':missing, use ''";
+    } else if (!params.value("deviceSN").isString()) {
+        qDebug() << "'deviceSN':type error";
+    }
+
+    QString DeviceSN = params.value("deviceSN").toString();
+    payload.p_params = DeviceSN.toUtf8() + '\0';
+}
+
+void DM1Protocol::encodeGetDeviceSN(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 0;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [1]
+void DM1Protocol::encodeSetDeviceName(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 1;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("deviceName")) {
+        qDebug() << "'deviceName':missing, use ''";
+    } else if (!params.value("deviceName").isString()) {
+        qWarning() << "'deviceName':type error";
+    }
+
+    QString DeviceName = params.value("deviceName").toString();
+    payload.p_params = DeviceName.toUtf8() + '\0';
+}
+
+void DM1Protocol::encodeGetDeviceName(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 1;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [2]
+void DM1Protocol::encodeGetDeviceVersion(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 2;
+    payload.p_ctrl.c_rw = 0;
+
+
+    if (!params.contains("type")) {
+        qDebug() << "'type':missing, use (0)";
+    } else if (!params.value("type").isDouble()) {
+        qWarning() << "'type':type error";
+    }
+
+    quint8 typeIndex = static_cast<quint8>(params.value("type").toInt());
+    payload.p_params.append(reinterpret_cast<char *>(&typeIndex), sizeof (quint8));
+}
+
+//! [5]
+void DM1Protocol::encodeGetHardwareVersion(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 5;
+    payload.p_ctrl.c_rw = 0;
+}
+
+/* 实时位姿 */
+//! [10]
+void DM1Protocol::encodeGetPose(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 10;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [11]
+void DM1Protocol::encodeResetPose(PacketPayload &payload, QJsonObject params)
+{
+#pragma pack(push, 1)
+    struct ResetPoseStruct {
+        quint8 manual;
+        float frontAngle1;
+        float frontAngle2;
+    };
+#pragma pack(pop)
+
+    payload.p_cmdID = 11;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("manual")) {
+        qDebug() << "'manual':missing, use (0)";
+    } else if (!params.value("manual").isDouble()) {
+        qWarning() << "'manual':type error";
+    }
+    if (!params.contains("rearArmAngle")) {
+        qDebug() << "'rearArmAngle':missing, use (0.0)";
+    } else if (!params.value("rearArmAngle").isDouble()) {
+        qWarning() << "'rearArmAngle':type error";
+    }
+    if (!params.contains("frontArmAngle")) {
+        qDebug() << "'frontArmAngle':missing, use (0.0)";
+    } else if (!params.value("frontArmAngle").isDouble()) {
+        qWarning() << "'frontArmAngle':type error";
+    }
+
+    ResetPoseStruct resetpose;
+    resetpose.manual = static_cast<quint8>(params.value("manual").toInt());
+    resetpose.frontAngle1 = static_cast<float>(params.value("frontAngle1").toDouble());
+    resetpose.frontAngle2 = static_cast<float>(params.value("frontAngle2").toDouble());
+
+    payload.p_params.append(reinterpret_cast<char *>(&resetpose), sizeof (ResetPoseStruct));
+}
+
+/* 报警功能 */
+//! [20]
+void DM1Protocol::encodeGetAlarmsState(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 20;
+    payload.p_ctrl.c_rw = 0;
+}
+
+void DM1Protocol::encodeClearAllAlarmsState(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 20;
+    payload.p_ctrl.c_rw = 1;
+}
+
+/* 回零 */
+//! [31]
+void DM1Protocol::encodeSetHOMECmd(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 31;
+    payload.p_ctrl.c_rw = 1;
+
+    quint8 isResetPars = params.value("isResetPars").toBool() ? 1 : 0;
+    payload.p_params.append(reinterpret_cast<char *>(&isResetPars), sizeof (quint8));
+}
+
+//! [34]
+void DM1Protocol::encodeSetHOMEInitialPos(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 34;
+    payload.p_ctrl.c_rw = 1;
+}
+
+//! [40]
+void DM1Protocol::encodeSetHHTTrigMode(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 40;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("mode")) {
+        qDebug() << "'mode':missing, use (0)";
+    } else if (!params.value("mode").isDouble()) {
+        qWarning() << "'mode':type error";
+    }
+
+    quint8 mode = static_cast<quint8>(params.value("mode").toInt());
+    payload.p_params.append(reinterpret_cast<char *>(&mode), sizeof (quint8));
+}
+
+void DM1Protocol::encodeGetHHTTrigMode(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 40;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [41]
+void DM1Protocol::encodeSetHHTTrigOutputEnabled(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 41;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("enable")) {
+        qDebug() << "'enable':missing, use (false)";
+    } else if (!params.value("enable").isBool()) {
+        qWarning() << "'enable':type error";
+    }
+
+    quint8 enable = params.value("enable").toBool() ? 1 : 0;
+    payload.p_params.append(reinterpret_cast<char *>(&enable), sizeof (quint8));
+}
+
+void DM1Protocol::encodeGetHHTTrigOutputEnabled(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 41;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [42]
+void DM1Protocol::encodeGetHHTTrigOutput(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 42;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [50]
+void DM1Protocol::encodeSetArmOrientation(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 50;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("orientation")) {
+        qDebug() << "'orientation':missing, use (0)";
+    } else if (!params.value("orientation").isDouble()) {
+        qWarning() << "'orientation':type error";
+    }
+
+    quint8 orientation = static_cast<quint8>(params.value("orientation").toInt());
+    payload.p_params.append(reinterpret_cast<char *>(&orientation), sizeof (quint8));
+}
+
+void DM1Protocol::encodeGetArmOrientation(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 50;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [60]
+void DM1Protocol::encodeSetEndEffectorParams(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 60;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("xOffset")) {
+        qDebug() << "'xOffset':missing, use (0.0)";
+    } else if (!params.value("xOffset").isDouble()) {
+        qWarning() << "'xOffset':type error";
+    }
+    if (!params.contains("yOffset")) {
+        qDebug() << "'yOffset':missing, use (0.0)";
+    } else if (!params.value("yOffset").isDouble()) {
+        qWarning() << "'yOffset':type error";
+    }
+    if (!params.contains("zOffset")) {
+        qDebug() << "'zOffset':missing, use (0.0)";
+    } else if (!params.value("zOffset").isDouble()) {
+        qWarning() << "'zOffset':type error";
+    }
+
+    float xOffset = static_cast<float>(params.value("xOffset").toDouble());
+    payload.p_params.append(reinterpret_cast<char *>(&xOffset), sizeof (float));
+
+    float yOffset = static_cast<float>(params.value("yOffset").toDouble());
+    payload.p_params.append(reinterpret_cast<char *>(&yOffset), sizeof (float));
+
+    float zOffset = static_cast<float>(params.value("zOffset").toDouble());
+    payload.p_params.append(reinterpret_cast<char *>(&zOffset), sizeof (float));
+}
+
+void DM1Protocol::encodeGetEndEffectorParams(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 60;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [61]
+void DM1Protocol::encodeSetEndEffectorLaser(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 61;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("enable")) {
+        qDebug() << "'enable':missing, use (false)";
+    } else if (!params.value("enable").isBool()) {
+        qWarning() << "'enable':type error";
+    }
+    if (!params.contains("on")) {
+        qDebug() << "'on':missing, use (false)";
+    } else if (!params.value("on").isBool()) {
+        qWarning() << "'on':type error";
+    }
+
+    quint8 enable = params.value("enable").toBool() ? 1 : 0;
+    payload.p_params.append(reinterpret_cast<char *>(&enable), sizeof (quint8));
+
+    quint8 on = params.value("on").toBool() ? 1 : 0;
+    payload.p_params.append(reinterpret_cast<char *>(&on), sizeof (quint8));
+}
+
+void DM1Protocol::encodeGetEndEffectorLaser(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 61;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [70]
+void DM1Protocol::encodeSetJOGJointParams(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 70;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("velocity")) {
+        qDebug() << "'velocity':missing, use ([0.0, 0.0, 0.0, 0.0])";
+    } else if (!params.value("velocity").isArray()) {
+        qWarning() << "'velocity':type error";
+    }
+    if (!params.contains("acceleration")) {
+        qDebug() << "'acceleration':missing, use ([0.0, 0.0, 0.0, 0.0])";
+    } else if (!params.value("acceleration").isArray()) {
+        qWarning() << "'acceleration':type error";
+    }
+
+    QJsonArray velocityArr = params.value("velocity").toArray();
+    QJsonArray accelerationArr = params.value("acceleration").toArray();
+
+    if (velocityArr.count() >= 4 and accelerationArr.count() >= 4) {
+        VelocityArrayStruct jogParams;
+        for(int i = 0; i < 4; i++) {
+            jogParams.velocity[i] = static_cast<float>(velocityArr.at(i).toDouble());
+            jogParams.acceleration[i] = static_cast<float>(accelerationArr.at(i).toDouble());
+        }
+        payload.p_params.append(reinterpret_cast<char *>(&jogParams), sizeof (VelocityArrayStruct));
+    } else {
+        qDebug() << "invalid params.";
+    }
+}
+
+void DM1Protocol::encodeGetJOGJointParams(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 70;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [71]
+void DM1Protocol::encodeSetJOGCoordinateParams(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 71;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("velocity")) {
+        qDebug() << "'velocity':missing, use ([0.0, 0.0, 0.0, 0.0])";
+    } else if (!params.value("velocity").isArray()) {
+        qWarning() << "'velocity':type error";
+    }
+    if (!params.contains("acceleration")) {
+        qDebug() << "'acceleration':missing, use ([0.0, 0.0, 0.0, 0.0])";
+    } else if (!params.value("acceleration").isArray()) {
+        qWarning() << "'acceleration':type error";
+    }
+
+    QJsonArray velocityArr = params.value("velocity").toArray();
+    QJsonArray accelerationArr = params.value("acceleration").toArray();
+
+    if (velocityArr.count() >= 4 && accelerationArr.count() >= 4) {
+        VelocityArrayStruct jogParams;
+        for(int i = 0; i < 4; i++) {
+            jogParams.velocity[i] = static_cast<float>(velocityArr.at(i).toDouble());
+            jogParams.acceleration[i] = static_cast<float>(accelerationArr.at(i).toDouble());
+        }
+        payload.p_params.append(reinterpret_cast<char *>(&jogParams), sizeof (VelocityArrayStruct));
+    } else {
+        qDebug() << "invalid params.";
+    }
+}
+
+void DM1Protocol::encodeGetJOGCoordinateParams(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 71;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [72]
+void DM1Protocol::encodeSetJOGCommonParams(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 72;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("velocityRatio")) {
+        qDebug() << "'velocityRatio':missing, use (0.0)";
+    } else if (!params.value("velocityRatio").isDouble()) {
+        qWarning() << "'velocityRatio':type error";
+    }
+    if (!params.contains("accelerationRatio")) {
+        qDebug() << "'accelerationRatio':missing, use (0.0)";
+    } else if (!params.value("accelerationRatio").isDouble()) {
+        qWarning() << "'accelerationRatio':type error";
+    }
+
+    VelocityRatioStruct jogParams;
+    jogParams.velocityRatio = static_cast<float>(params.value("velocityRatio").toDouble());
+    jogParams.accelerationRatio = static_cast<float>(params.value("accelerationRatio").toDouble());
+
+    payload.p_params.append(reinterpret_cast<char *>(&jogParams), sizeof (VelocityRatioStruct));
+}
+
+void DM1Protocol::encodeGetJOGCommonParams(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 72;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [73]
+void DM1Protocol::encodeSetJOGCmd(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 73;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("isJoint")) {
+        qDebug() << "'isJoint':missing, use (false)";
+    } else if (!params.value("isJoint").isBool()) {
+        qWarning() << "'isJoint':type error";
+    }
+    if (!params.contains("cmd")) {
+        qDebug() << "'cmd':missing, use (0)";
+    } else if (!params.value("cmd").isDouble()) {
+        qWarning() << "'cmd':type error";
+    }
+
+    quint8 isJoint = params.value("isJoint").toBool() ? 1 : 0;
+    payload.p_params.append(reinterpret_cast<char *>(&isJoint), sizeof (quint8));
+
+    quint8 cmd = static_cast<quint8>(params.value("cmd").toInt());
+    payload.p_params.append(reinterpret_cast<char *>(&cmd), sizeof (quint8));
+}
+
+//! [75]
+void DM1Protocol::encodeSetInchMode(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 75;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("mode")) {
+        qDebug() << "'mode':missing, use (0)";
+    } else if (!params.value("mode").isDouble()) {
+        qWarning() << "'mode':type error";
+    }
+
+    quint8 inchMode = static_cast<quint8>(params.value("mode").toInt());
+    payload.p_params.append(reinterpret_cast<char *>(&inchMode), sizeof (quint8));
+}
+
+void DM1Protocol::encodeGetInchMode(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 75;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [76]
+void DM1Protocol::encodeSetInchParam(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 76;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("distanceMM")) {
+        qDebug() << "'distanceMM':missing, use (0.0)";
+    } else if (!params.value("distanceMM").isDouble()) {
+        qWarning() << "'distanceMM':type error";
+    }
+    if (!params.contains("distanceANG")) {
+        qDebug() << "'distanceANG':missing, use (0.0)";
+    } else if (!params.value("distanceANG").isDouble()) {
+        qWarning() << "'distanceANG':type error";
+    }
+
+    InchParamsStruct inchParams;
+    inchParams.distanceMM = static_cast<float>(params.value("distanceMM").toDouble());
+    inchParams.distanceANG = static_cast<float>(params.value("distanceANG").toDouble());
+    payload.p_params.append(reinterpret_cast<char *>(&inchParams), sizeof (InchParamsStruct));
+}
+
+void DM1Protocol::encodeGetInchParam(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 76;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [80]
+void DM1Protocol::encodeSetPTPJointParams(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 80;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("velocity")) {
+        qDebug() << "'velocity':missing, use ([0.0, 0.0, 0.0, 0.0])";
+    } else if (!params.value("velocity").isArray()) {
+        qWarning() << "'velocity':type error";
+    }
+    if (!params.contains("acceleration")) {
+        qDebug() << "'acceleration':missing, use ([0.0, 0.0, 0.0, 0.0])";
+    } else if (!params.value("acceleration").isArray()) {
+        qWarning() << "'acceleration':type error";
+    }
+
+    QJsonArray velocityArr = params.value("velocity").toArray();
+    QJsonArray accelerationArr = params.value("acceleration").toArray();
+
+    if (velocityArr.count() >= 4 && accelerationArr.count() >= 4) {
+        VelocityArrayStruct ptpJointParams;
+        for(int i = 0; i < 4; i++) {
+            ptpJointParams.velocity[i] = static_cast<float>(velocityArr.at(i).toDouble());
+            ptpJointParams.acceleration[i] = static_cast<float>(accelerationArr.at(i).toDouble());
+        }
+        payload.p_params.append(reinterpret_cast<char *>(&ptpJointParams), sizeof (VelocityArrayStruct));
+    } else {
+        qDebug() << "invalid params.";
+    }
+}
+
+void DM1Protocol::encodeGetPTPJointParams(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 80;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [81]
+void DM1Protocol::encodeSetPTPCoordinateParams(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 81;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("rVelocity")) {
+        qDebug() << "'rVelocity':missing, use (0.0)";
+    } else if (!params.value("rVelocity").isDouble()) {
+        qWarning() << "'rVelocity':type error";
+    }
+    if (!params.contains("xyzVelocity")) {
+        qDebug() << "'xyzVelocity':missing, use (0.0)";
+    } else if (!params.value("xyzVelocity").isDouble()) {
+        qWarning() << "'xyzVelocity':type error";
+    }
+    if (!params.contains("rAcceleration")) {
+        qDebug() << "'rAcceleration':missing, use (0.0)";
+    } else if (!params.value("rAcceleration").isDouble()) {
+        qWarning() << "'rAcceleration':type error";
+    }
+    if (!params.contains("xyzAcceleration")) {
+        qDebug() << "'xyzAcceleration':missing, use (0.0)";
+    } else if (!params.value("xyzAcceleration").isDouble()) {
+        qWarning() << "'xyzAcceleration':type error";
+    }
+
+    PTPCoordinateParamsStruct ptpCoordinateParams;
+    ptpCoordinateParams.rVelocity = static_cast<float>(params.value("rVelocity").toDouble());
+    ptpCoordinateParams.xyzVelocity = static_cast<float>(params.value("xyzVelocity").toDouble());
+    ptpCoordinateParams.rAcceleration = static_cast<float>(params.value("rAcceleration").toDouble());
+    ptpCoordinateParams.xyzAcceleration = static_cast<float>(params.value("xyzAcceleration").toDouble());
+
+    payload.p_params.append(reinterpret_cast<char *>(&ptpCoordinateParams), sizeof (PTPCoordinateParamsStruct));
+}
+
+void DM1Protocol::encodeGetPTPCoordinateParams(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 81;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [82]
+void DM1Protocol::encodeSetPTPJumpParams(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 82;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("jumpHeight")) {
+        qDebug() << "'jumpHeight':missing, use (0.0)";
+    } else if (!params.value("jumpHeight").isDouble()) {
+        qWarning() << "'jumpHeight':type error";
+    }
+    if (!params.contains("zLimit")) {
+        qDebug() << "'zLimit':missing, use (0.0)";
+    } else if (!params.value("zLimit").isDouble()) {
+        qWarning() << "'zLimit':type error";
+    }
+
+    float jumpHeight = static_cast<float>(params.value("jumpHeight").toDouble());
+    payload.p_params.append(reinterpret_cast<char *>(&jumpHeight), sizeof (float));
+
+    float zLimit = static_cast<float>(params.value("zLimit").toDouble());
+    payload.p_params.append(reinterpret_cast<char *>(&zLimit), sizeof (float));
+}
+
+void DM1Protocol::encodeGetPTPJumpParams(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 82;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [83]
+void DM1Protocol::encodeSetPTPCommonParams(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 83;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("velocityRatio")) {
+        qDebug() << "'velocityRatio':missing, use (0.0)";
+    } else if (!params.value("velocityRatio").isDouble()) {
+        qWarning() << "'velocityRatio':type error";
+    }
+    if (!params.contains("accelerationRatio")) {
+        qDebug() << "'accelerationRatio':missing, use (0.0)";
+    } else if (!params.value("accelerationRatio").isDouble()) {
+        qWarning() << "'accelerationRatio':type error";
+    }
+
+    VelocityRatioStruct ptpParams;
+    ptpParams.velocityRatio = static_cast<float>(params.value("velocityRatio").toDouble());
+    ptpParams.accelerationRatio = static_cast<float>(params.value("accelerationRatio").toDouble());
+
+    payload.p_params.append(reinterpret_cast<char *>(&ptpParams), sizeof (VelocityRatioStruct));
+}
+
+void DM1Protocol::encodeGetPTPCommonParams(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 83;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [84]
+void DM1Protocol::encodeSetPTPCmd(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 84;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("ptpMode")) {
+        qDebug() << "'ptpMode':missing, use (0)";
+    } else if (!params.value("ptpMode").isDouble()) {
+        qWarning() << "'ptpMode':type error";
+    }
+    if (!params.contains("x")) {
+        qDebug() << "'x':missing, use (0.0)";
+    } else if (!params.value("x").isDouble()) {
+        qWarning() << "'x':type error";
+    }
+    if (!params.contains("y")) {
+        qDebug() << "'y':missing, use (0.0)";
+    } else if (!params.value("y").isDouble()) {
+        qWarning() << "'y':type error";
+    }
+    if (!params.contains("z")) {
+        qDebug() << "'z':missing, use (0.0)";
+    } else if (!params.value("z").isDouble()) {
+        qWarning() << "'z':type error";
+    }
+    if (!params.contains("r")) {
+        qDebug() << "'r':missing, use (0.0)";
+    } else if (!params.value("r").isDouble()) {
+        qWarning() << "'r':type error";
+    }
+
+    PTPCmdStruct ptpCmd;
+    ptpCmd.ptpMode = static_cast<quint8>(params.value("ptpMode").toInt());
+    ptpCmd.x = static_cast<float>(params.value("x").toDouble());
+    ptpCmd.y = static_cast<float>(params.value("y").toDouble());
+    ptpCmd.z = static_cast<float>(params.value("z").toDouble());
+    ptpCmd.r = static_cast<float>(params.value("r").toDouble());
+
+    payload.p_params.append(reinterpret_cast<char *>(&ptpCmd), sizeof (PTPCmdStruct));
+}
+
+//! [90]
+void DM1Protocol::encodeSetCPParams(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 90;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("targetAcc")) {
+        qDebug() << "'targetAcc':missing, use (0.0)";
+    } else if (!params.value("targetAcc").isDouble()) {
+        qWarning() << "'targetAcc':type error";
+    }
+    if (!params.contains("junctionVel")) {
+        qDebug() << "'junctionVel':missing, use (0.0)";
+    } else if (!params.value("junctionVel").isDouble()) {
+        qWarning() << "'junctionVel':type error";
+    }
+    if (!params.contains("isRealTimeTrack")) {
+        qDebug() << "'isRealTimeTrack':missing, use (false)";
+    } else if (!params.value("isRealTimeTrack").isBool()) {
+        qWarning() << "'isRealTimeTrack':type error";
+    }
+
+    CPParamsStruct cpParams;
+    cpParams.targetAcc = static_cast<float>(params.value("targetAcc").toDouble());
+    cpParams.junctionVel = static_cast<float>(params.value("junctionVel").toDouble());
+
+    bool isRealTimeTrack = params.value("isRealTimeTrack").toBool();
+    if (isRealTimeTrack) {
+        cpParams.realTimeTrack = 1;
+        cpParams.period = static_cast<float>(params.value("period").toDouble());
+    } else {
+        cpParams.realTimeTrack = 0;
+        cpParams.acc = static_cast<float>(params.value("acc").toDouble());
+    }
+
+    payload.p_params.append(reinterpret_cast<char *>(&cpParams), sizeof (CPParamsStruct));
+}
+
+void DM1Protocol::encodeGetCPParams(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 90;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [91]
+void DM1Protocol::encodeSetCPCmd(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 91;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("cpMode")) {
+        qDebug() << "'cpMode':missing, use (0)";
+    } else if (!params.value("cpMode").isDouble()) {
+        qWarning() << "'cpMode':type error";
+    }
+    if (!params.contains("x")) {
+        qDebug() << "'x':missing, use (0.0)";
+    } else if (!params.value("x").isDouble()) {
+        qWarning() << "'x':type error";
+    }
+    if (!params.contains("y")) {
+        qDebug() << "'y':missing, use (0.0)";
+    } else if (!params.value("y").isDouble()) {
+        qWarning() << "'y':type error";
+    }
+    if (!params.contains("z")) {
+        qDebug() << "'z':missing, use (0.0)";
+    } else if (!params.value("z").isDouble()) {
+        qWarning() << "'z':type error";
+    }
+    if (!params.contains("power")) {
+        qDebug() << "'power':missing, use (0.0)";
+    } else if (!params.value("power").isDouble()) {
+        qWarning() << "'power':type error";
+    }
+
+    CPCmdStruct cpCmd;
+    cpCmd.cpMode = static_cast<quint8>(params.value("cpMode").toInt());
+    cpCmd.x = static_cast<float>(params.value("x").toDouble());
+    cpCmd.y = static_cast<float>(params.value("y").toDouble());
+    cpCmd.z = static_cast<float>(params.value("z").toDouble());
+    cpCmd.power = static_cast<float>(params.value("power").toDouble());
+
+    payload.p_params.append(reinterpret_cast<char *>(&cpCmd), sizeof (CPCmdStruct));
+}
+
+//! [92]
+void DM1Protocol::encodeSetCPLECmd(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 92;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("cpMode")) {
+        qDebug() << "'cpMode':missing, use (0)";
+    } else if (!params.value("cpMode").isDouble()) {
+        qWarning() << "'cpMode':type error";
+    }
+    if (!params.contains("x")) {
+        qDebug() << "'x':missing, use (0.0)";
+    } else if (!params.value("x").isDouble()) {
+        qWarning() << "'x':type error";
+    }
+    if (!params.contains("y")) {
+        qDebug() << "'y':missing, use (0.0)";
+    } else if (!params.value("y").isDouble()) {
+        qWarning() << "'y':type error";
+    }
+    if (!params.contains("z")) {
+        qDebug() << "'z':missing, use (0.0)";
+    } else if (!params.value("z").isDouble()) {
+        qWarning() << "'z':type error";
+    }
+    if (!params.contains("power")) {
+        qDebug() << "'power':missing, use (0.0)";
+    } else if (!params.value("power").isDouble()) {
+        qWarning() << "'power':type error";
+    }
+
+    CPCmdStruct cpCmd;
+    cpCmd.cpMode = static_cast<quint8>(params.value("cpMode").toInt());
+    cpCmd.x = static_cast<float>(params.value("x").toDouble());
+    cpCmd.y = static_cast<float>(params.value("y").toDouble());
+    cpCmd.z = static_cast<float>(params.value("z").toDouble());
+    cpCmd.power = static_cast<float>(params.value("power").toDouble());
+
+    payload.p_params.append(reinterpret_cast<char *>(&cpCmd), sizeof (CPCmdStruct));
+}
+
+//! [100]
+void DM1Protocol::encodeSetARCParams(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 100;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("xyzVelocity")) {
+        qDebug() << "'xyzVelocity':missing, use (0.0)";
+    } else if (!params.value("xyzVelocity").isDouble()) {
+        qWarning() << "'xyzVelocity':type error";
+    }
+    if (!params.contains("rVelocity")) {
+        qDebug() << "'rVelocity':missing, use (0.0)";
+    } else if (!params.value("rVelocity").isDouble()) {
+        qWarning() << "'rVelocity':type error";
+    }
+    if (!params.contains("xyzAcceleration")) {
+        qDebug() << "'xyzAcceleration':missing, use (0.0)";
+    } else if (!params.value("xyzAcceleration").isDouble()) {
+        qWarning() << "'xyzAcceleration':type error";
+    }
+    if (!params.contains("rAcceleration")) {
+        qDebug() << "'rAcceleration':missing, use (0.0)";
+    } else if (!params.value("rAcceleration").isDouble()) {
+        qWarning() << "'rAcceleration':type error";
+    }
+
+    ARCParamsStruct arcParams;
+    arcParams.xyzVelocity = static_cast<float>(params.value("xyzVelocity").toDouble());
+    arcParams.rVelocity = static_cast<float>(params.value("rVelocity").toDouble());
+    arcParams.xyzAcceleration = static_cast<float>(params.value("xyzAcceleration").toDouble());
+    arcParams.rAcceleration = static_cast<float>(params.value("rAcceleration").toDouble());
+
+    payload.p_params.append(reinterpret_cast<char *>(&arcParams), sizeof (ARCParamsStruct));
+}
+
+void DM1Protocol::encodeGetARCParams(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 100;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [101]
+void DM1Protocol::encodeSetARCCmd(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 101;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("cirPoint")) {
+        qWarning() << "'cirPoint':missing, use ({x:0.0, y:0.0, z:0.0, r:0.0})";
+    } else if (!params.value("cirPoint").isObject()) {
+        qWarning() << "'cirPoint':type error";
+    }
+    if (!params.contains("toPoint")) {
+        qWarning() << "'toPoint':missing, use ({x:0.0, y:0.0, z:0.0, r:0.0})";
+    } else if (!params.value("toPoint").isObject()) {
+        qWarning() << "'toPoint':type error";
+    }
+
+    ARCCmdStruct arcCmd;
+
+    QJsonObject cirPointObj = params.value("cirPoint").toObject();
+    arcCmd.cirPoint.x = static_cast<float>(cirPointObj.value("x").toDouble());
+    arcCmd.cirPoint.y = static_cast<float>(cirPointObj.value("y").toDouble());
+    arcCmd.cirPoint.z = static_cast<float>(cirPointObj.value("z").toDouble());
+    arcCmd.cirPoint.r = static_cast<float>(cirPointObj.value("r").toDouble());
+
+    QJsonObject toPointObj = params.value("toPoint").toObject();
+    arcCmd.toPoint.x = static_cast<float>(toPointObj.value("x").toDouble());
+    arcCmd.toPoint.y = static_cast<float>(toPointObj.value("y").toDouble());
+    arcCmd.toPoint.z = static_cast<float>(toPointObj.value("z").toDouble());
+    arcCmd.toPoint.r = static_cast<float>(toPointObj.value("r").toDouble());
+
+    payload.p_params.append(reinterpret_cast<char *>(&arcCmd), sizeof (ARCCmdStruct));
+}
+
+//! [102]
+void DM1Protocol::encodeSetCircleCmd(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 102;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("cirPoint")) {
+        qWarning() << "'cirPoint':missing, use ({x:0.0, y:0.0, z:0.0, r:0.0})";
+    } else if (!params.value("cirPoint").isObject()) {
+        qWarning() << "'cirPoint':type error";
+    }
+    if (!params.contains("toPoint")) {
+        qWarning() << "'toPoint':missing, use ({x:0.0, y:0.0, z:0.0, r:0.0})";
+    } else if (!params.value("toPoint").isObject()) {
+        qWarning() << "'toPoint':type error";
+    }
+    if (!params.contains("count")) {
+        qWarning() << "'count':missing, use (0)";
+    } else if (!params.value("count").isDouble()) {
+        qWarning() << "'count':type error";
+    }
+
+    CircleCmdStruct circleCmd;
+
+    QJsonObject cirPointObj = params.value("cirPoint").toObject();
+    circleCmd.cirPoint.x = static_cast<float>(cirPointObj.value("x").toDouble());
+    circleCmd.cirPoint.y = static_cast<float>(cirPointObj.value("y").toDouble());
+    circleCmd.cirPoint.z = static_cast<float>(cirPointObj.value("z").toDouble());
+    circleCmd.cirPoint.r = static_cast<float>(cirPointObj.value("r").toDouble());
+
+    QJsonObject toPointObj = params.value("toPoint").toObject();
+    circleCmd.toPoint.x = static_cast<float>(toPointObj.value("x").toDouble());
+    circleCmd.toPoint.y = static_cast<float>(toPointObj.value("y").toDouble());
+    circleCmd.toPoint.z = static_cast<float>(toPointObj.value("z").toDouble());
+    circleCmd.toPoint.r = static_cast<float>(toPointObj.value("r").toDouble());
+
+    circleCmd.count = static_cast<quint32>(toPointObj.value("count").toDouble());
+
+    payload.p_params.append(reinterpret_cast<char *>(&circleCmd), sizeof (CircleCmdStruct));
+}
+
+//! [110]
+void DM1Protocol::encodeSetWAITCmd(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 110;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("delay")) {
+        qDebug() << "'delay':missing, use (0)";
+    } else if (!params.value("delay").isDouble()) {
+        qWarning() << "'delay':type error";
+    }
+
+    quint32 delayMs = static_cast<quint32>(params.value("delay").toInt());
+    payload.p_params.append(reinterpret_cast<char *>(&delayMs), sizeof (quint32));
+}
+
+//! [120]
+void DM1Protocol::encodeSetTRIGCmd(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 120;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("port")) {
+        qDebug() << "'port':missing, use (0)";
+    } else if (!params.value("port").isDouble()) {
+        qWarning() << "'port':type error";
+    }
+    if (!params.contains("mode")) {
+        qDebug() << "'mode':missing, use (0)";
+    } else if (!params.value("mode").isDouble()) {
+        qWarning() << "'mode':type error";
+    }
+    if (!params.contains("condition")) {
+        qDebug() << "'condition':missing, use (0)";
+    } else if (!params.value("condition").isDouble()) {
+        qWarning() << "'condition':type error";
+    }
+    if (!params.contains("threshold")) {
+        qDebug() << "'threshold':missing, use (0)";
+    } else if (!params.value("threshold").isDouble()) {
+        qWarning() << "'threshold':type error";
+    }
+
+    TRIGCmdStruct triggerCmd;
+    triggerCmd.port = static_cast<quint8>(params.value("port").toInt());
+    triggerCmd.mode = static_cast<quint8>(params.value("mode").toInt());
+    triggerCmd.condition = static_cast<quint8>(params.value("condition").toInt());
+    triggerCmd.threshold = static_cast<quint16>(params.value("threshold").toInt());
+
+    payload.p_params.append(reinterpret_cast<char *>(&triggerCmd), sizeof (TRIGCmdStruct));
+}
+
+//! [131]
+void DM1Protocol::encodeSetIODO(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 131;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("port")) {
+        qDebug() << "'port':missing, use (0)";
+    } else if (!params.value("port").isDouble()) {
+        qWarning() << "'port':type error";
+    }
+    if (!params.contains("level")) {
+        qDebug() << "'level':missing, use (0)";
+    } else if (!params.value("level").isDouble()) {
+        qWarning() << "'level':type error";
+    }
+
+    quint8 port = static_cast<quint8>(params.value("port").toInt());
+    payload.p_params.append(reinterpret_cast<char *>(&port), sizeof (quint8));
+
+    quint8 level = static_cast<quint8>(params.value("level").toInt());
+    payload.p_params.append(reinterpret_cast<char *>(&level), sizeof (quint8));
+}
+
+void DM1Protocol::encodeGetIODO(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 131;
+    payload.p_ctrl.c_rw = 0;
+
+    if (!params.contains("port")) {
+        qDebug() << "'port':missing, use (0)";
+    } else if (!params.value("port").isDouble()) {
+        qWarning() << "'port':type error";
+    }
+
+    quint8 port = static_cast<quint8>(params.value("port").toInt());
+    payload.p_params.append(reinterpret_cast<char *>(&port), sizeof (quint8));
+}
+
+//! [133]
+void DM1Protocol::encodeGetIODI(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 133;
+    payload.p_ctrl.c_rw = 0;
+
+    if (!params.contains("port")) {
+        qDebug() << "'port':missing, use (0)";
+    } else if (!params.value("port").isDouble()) {
+        qWarning() << "'port':type error";
+    }
+
+    quint8 port = static_cast<quint8>(params.value("port").toInt());
+    payload.p_params.append(reinterpret_cast<char *>(&port), sizeof (quint8));
+}
+
+//! [134]
+void DM1Protocol::encodeGetIOADC(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 134;
+    payload.p_ctrl.c_rw = 0;
+
+    if (!params.contains("port")) {
+        qDebug() << "'port':missing, use (0)";
+    } else if (!params.value("port").isDouble()) {
+        qWarning() << "'port':type error";
+    }
+
+    quint8 port = static_cast<quint8>(params.value("port").toInt());
+    payload.p_params.append(reinterpret_cast<char *>(&port), sizeof (quint8));
+}
+
+//! [200]
+void DM1Protocol::encodeSetSafeModeEnabled(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 200;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("enable")) {
+        qDebug() << "'enable':missing, use (false)";
+    } else if (!params.value("enable").isBool()) {
+        qWarning() << "'enable':type error";
+    }
+
+    quint8 enable = params.value("enable").toBool() ? 1 : 0;
+    payload.p_params.append(reinterpret_cast<char *>(&enable), sizeof (quint8));
+}
+
+void DM1Protocol::encodeGetSafeModeEnabled(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 200;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [201]
+void DM1Protocol::encodeSetCollisionThreshold(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 201;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("torDiffJ1")) {
+        qDebug() << "'torDiffJ1':missing, use (0.0)";
+    } else if (!params.value("torDiffJ1").isDouble()) {
+        qWarning() << "'torDiffJ1':type error";
+    }
+    if (!params.contains("torDiffJ2")) {
+        qDebug() << "'torDiffJ2':missing, use (0.0)";
+    } else if (!params.value("torDiffJ2").isDouble()) {
+        qWarning() << "'torDiffJ2':type error";
+    }
+    if (!params.contains("torDiffJ3")) {
+        qDebug() << "'torDiffJ3':missing, use (0.0)";
+    } else if (!params.value("torDiffJ3").isDouble()) {
+        qWarning() << "'torDiffJ3':type error";
+    }
+    if (!params.contains("torDiffJ4")) {
+        qDebug() << "'torDiffJ4':missing, use (0.0)";
+    } else if (!params.value("torDiffJ4").isDouble()) {
+        qWarning() << "'torDiffJ4':type error";
+    }
+
+    TorDiffParamsStruct torDiffParams;
+    torDiffParams.torDiffJ1 = static_cast<float>(params.value("torDiffJ1").toDouble());
+    torDiffParams.torDiffJ2 = static_cast<float>(params.value("torDiffJ2").toDouble());
+    torDiffParams.torDiffJ3 = static_cast<float>(params.value("torDiffJ3").toDouble());
+    torDiffParams.torDiffJ4 = static_cast<float>(params.value("torDiffJ4").toDouble());
+
+    payload.p_params.append(reinterpret_cast<char *>(&torDiffParams), sizeof (TorDiffParamsStruct));
+}
+
+void DM1Protocol::encodeGetCollisionThreshold(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 201;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [203]
+void DM1Protocol::encodeSetLoadParams(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 203;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("loadParams")) {
+        qDebug() << "'loadParams':missing, use (0.0)";
+    } else if (!params.value("loadParams").isDouble()) {
+        qWarning() << "'loadParams':type error";
+    }
+
+    float loadParams = static_cast<float>(params.value("loadParams").toDouble());
+    payload.p_params.append(reinterpret_cast<char *>(&loadParams), sizeof (float));
+}
+
+void DM1Protocol::encodeGetLoadParams(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 203;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [208]
+void DM1Protocol::encodeSetSafeStrategy(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 208;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("mode")) {
+        qDebug() << "'mode':missing, use (0)";
+    } else if (!params.value("mode").isDouble()) {
+        qWarning() << "'mode':type error";
+    }
+
+    quint8 mode = static_cast<quint8>(params.value("mode").toInt());
+    payload.p_params.append(reinterpret_cast<char *>(&mode), sizeof (quint8));
+}
+
+void DM1Protocol::encodeGetSafeStrategy(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 208;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [210]
+void DM1Protocol::encodeSetSafeGuardMode(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 210;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("mode")) {
+        qDebug() << "'mode':missing, use (0)";
+    } else if (!params.value("mode").isDouble()) {
+        qWarning() << "'mode':type error";
+    }
+
+    quint8 safeGuardMode = static_cast<quint8>(params.value("mode").toInt());
+    payload.p_params.append(reinterpret_cast<char *>(&safeGuardMode), sizeof (quint8));
+}
+
+void DM1Protocol::encodeGetSafeGuardMode(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 210;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [211]
+void DM1Protocol::encodeGetSafeGuardStatus(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 211;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [240]
+void DM1Protocol::encodeSetQueuedCmdStart(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 240;
+    payload.p_ctrl.c_rw = 1;
+}
+
+//! [241]
+void DM1Protocol::encodeSetQueuedCmdStop(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 241;
+    payload.p_ctrl.c_rw = 1;
+}
+
+//! [242]
+void DM1Protocol::encodeSetQueuedCmdForceStop(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 242;
+    payload.p_ctrl.c_rw = 1;
+}
+
+//! [243]
+void DM1Protocol::encodeSetQueuedCmdStartDownload(PacketPayload &payload, QJsonObject params)
+{
+    payload.p_cmdID = 243;
+    payload.p_ctrl.c_rw = 1;
+
+    if (!params.contains("totalLoop")) {
+        qDebug() << "'totalLoop':missing, use (0)";
+    } else if (!params.value("totalLoop").isDouble()) {
+        qWarning() << "'totalLoop':type error";
+    }
+    if (!params.contains("linePerLoop")) {
+        qDebug() << "'linePerLoop':missing, use (0)";
+    } else if (!params.value("linePerLoop").isDouble()) {
+        qWarning() << "'linePerLoop':type error";
+    }
+
+    quint8 totalLoop = static_cast<quint8>(params.value("totalLoop").toInt());
+    payload.p_params.append(reinterpret_cast<char *>(&totalLoop), sizeof (quint8));
+
+    quint8 linePerLoop = static_cast<quint8>(params.value("linePerLoop").toInt());
+    payload.p_params.append(reinterpret_cast<char *>(&linePerLoop), sizeof (quint8));
+}
+
+//! [244]
+void DM1Protocol::encodeSetQueuedCmdStopDownload(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 244;
+    payload.p_ctrl.c_rw = 1;
+}
+
+//! [245]
+void DM1Protocol::encodeSetQueuedCmdClear(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 245;
+    payload.p_ctrl.c_rw = 1;
+}
+
+//! [246]
+void DM1Protocol::encodeGetQueuedCmdCurrentIndex(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 246;
+    payload.p_ctrl.c_rw = 0;
+}
+
+//! [247]
+void DM1Protocol::encodeGetQueuedCmdLeftSpace(PacketPayload &payload, QJsonObject params)
+{
+    Q_UNUSED(params)
+
+    payload.p_cmdID = 247;
+    payload.p_ctrl.c_rw = 0;
+}
+
+

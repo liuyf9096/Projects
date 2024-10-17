@@ -1,0 +1,395 @@
+#include "MessageHandler.h"
+
+#include <QThread>
+#include <QSerialPort>
+#include <QSerialPortInfo>
+#include <QUdpSocket>
+#include <QNetworkDatagram>
+#include <QTimer>
+#include <QStringList>
+#include <QDebug>
+
+#include "DError.h"
+
+#define TIMEOVER_MS (1000)      /* 超时时间设置 */
+#define RESEND_TIMES_MAX (3)    /* 重发次数设置 */
+#define CLIENT_PORT (12345)     /* udp客户端端口号默认设置 */
+
+MessageHandler::MessageHandler(QObject *parent) : QObject(parent)
+{ 
+    m_TimeoverMs = TIMEOVER_MS;
+    m_isConnected = false;
+    isSerialConnection = true;
+    m_deviceUdpPort = CLIENT_PORT;
+
+    _TimerInit();
+    _SerialPortInit();
+    _UdpSocketInit();
+
+#if 0
+    /* 打印串口详细信息 */
+    receivePacket.setPrintDetailMode(true);
+#endif
+}
+
+MessageHandler::~MessageHandler()
+{
+    qDebug() << __FUNCTION__ << "start";
+    if (m_isConnected == true) {
+       disconnectDevice();
+    }
+    qDebug() << __FUNCTION__ << "finish";
+}
+
+void MessageHandler::setProtocolType(ProtocolType type)
+{
+    m_ProtocolType = type;
+}
+
+void MessageHandler::_TimerInit()
+{
+    /* Timer - period */
+    m_PeriodTimer = new QTimer(this);
+    connect(m_PeriodTimer, &QTimer::timeout, this, &MessageHandler::_PeriodicTask_slot);
+
+    /* Timer - timeout */
+    m_TimeOutTimer = new QTimer(this);
+    m_TimeOutTimer->setInterval(m_TimeoverMs);
+    connect(m_TimeOutTimer, &QTimer::timeout, this, [=](){
+        m_isTimeOver = true;
+    });
+
+    /* Timer - keep alive */
+    m_KeepAliveTimer = new QTimer(this);
+    m_KeepAliveTimer->setInterval(500);
+    connect(m_KeepAliveTimer, &QTimer::timeout, this, [=](){
+        QList<QSerialPortInfo> availablePorts = QSerialPortInfo::availablePorts();
+        bool check = false;
+        foreach(const QSerialPortInfo &portInfo, availablePorts) {
+            if (portInfo.portName() == m_serialPort->portName()) {
+                check = true;
+                break;
+            }
+        }
+        if (check == false) {
+            disconnectDevice();
+            emit onErrorOccurred_signal(DeviceLostConnectionError);
+        }
+    });
+}
+
+bool MessageHandler::_bindLocalHostIp()
+{
+    quint16 port;
+    for (port = m_deviceUdpPort + 1; port < m_deviceUdpPort + 100; ++port) {
+        bool ok = m_udpSocket->bind(QHostAddress(m_localhostIp), port);
+        if (ok) {
+            qDebug().noquote() << "UDP:set HostIpAddress:" << m_localhostIp << "port:" << port;
+            return true;
+        }
+    }
+
+    qDebug() << "UDP:fail to find HostIpAddress.";
+    return false;
+}
+
+void MessageHandler::_SerialPortInit()
+{
+    m_serialPort = new QSerialPort(this);
+    m_serialPort->setBaudRate(QSerialPort::Baud115200);
+    m_serialPort->setDataBits(QSerialPort::Data8);
+    m_serialPort->setStopBits(QSerialPort::OneStop);
+    m_serialPort->setParity(QSerialPort::NoParity);
+    m_serialPort->setFlowControl(QSerialPort::NoFlowControl);
+
+    connect(m_serialPort, &QSerialPort::readyRead, this, &MessageHandler::onSerialReadyRead_slot);
+    connect(m_serialPort, &QSerialPort::errorOccurred, this, [=](QSerialPort::SerialPortError error){
+        if (error != QSerialPort::NoError) {
+            emit onConnectStatus_signal(error, m_connectCmdID);
+        }
+    });
+}
+
+void MessageHandler::_UdpSocketInit()
+{
+    m_udpSocket = new QUdpSocket(this);
+    connect(m_udpSocket, &QUdpSocket::readyRead,
+            this, &MessageHandler::onReadDatagram_slot);
+}
+
+/* 连接设备串口 */
+void MessageHandler::connectDevice(quint64 id)
+{
+    qDebug() << __FUNCTION__;
+
+    m_connectCmdID = id;
+
+    if (m_isConnected == true) {
+        qDebug() << "Please disconnect device first. 请先断开连接";
+    } else if (isSerialConnection == true) {
+        /* serial port connection */
+        if (m_serialPort->open(QIODevice::ReadWrite)) {
+            m_isConnected = true;
+            m_currentState = IdleState;
+            m_PeriodTimer->start();
+            m_KeepAliveTimer->start();
+
+            emit onConnectStatus_signal(0, id);
+        } else {
+            qDebug() << "serialport open failed.";
+        }
+    } else {
+        /* udp connection */
+        if (_bindLocalHostIp()) {
+            m_isConnected = true;
+            m_currentState = IdleState;
+            m_PeriodTimer->start();
+
+            emit onConnectStatus_signal(0, id);
+        }
+    }
+}
+
+/* 断开连接 */
+void MessageHandler::disconnectDevice(quint64 id)
+{
+    qDebug() << "MessageHandler" << __FUNCTION__ << "id:" << id;
+
+    if (m_serialPort->isOpen()) {
+        m_serialPort->close();
+    }
+    if (m_udpSocket->isOpen()) {
+        m_udpSocket->close();
+    }
+    if (m_PeriodTimer->isActive()) {
+        m_PeriodTimer->stop();
+    }
+    if (m_TimeOutTimer->isActive()) {
+        m_TimeOutTimer->stop();
+    }
+    if (m_KeepAliveTimer->isActive()) {
+        m_KeepAliveTimer->stop();
+    }
+
+    m_udpSocket->abort();
+    m_rxBuffer.clear();
+    receivePacket.clear();
+    currentPacket.clear();
+    m_currentState = IdleState;
+    m_isConnected = false;
+
+    QJsonObject resObj;
+    resObj.insert("id", static_cast<double>(id));
+    resObj.insert("cmd", "DisconnectDobot");
+    emit sendMessages_signal(resObj);
+}
+
+bool MessageHandler::isConnected()
+{
+    return m_isConnected;
+}
+
+void MessageHandler::setPortName(QString portName)
+{
+    isSerialConnection = true;
+    m_serialPort->setPortName(portName);
+}
+
+QString MessageHandler::getPortName()
+{
+    if (!isSerialConnection) {
+        return m_deviceUdpIp;
+    }
+    return m_serialPort->portName();
+}
+
+void MessageHandler::setUdpIpAddress(QString ip)
+{
+    isSerialConnection = false;
+    m_deviceUdpIp = ip;
+}
+
+QString MessageHandler::getUdpIpAddress()
+{
+    return m_deviceUdpIp;
+}
+
+/* 常见端口号设置 0~65535
+ * 0-1023: Well-Known Ports（即公认端口号）
+ * 它是一些众人皆知著名的端口号，这些端口号固定分配给一些服务，我们上面提到的 HTTP 服务、 FTP服务等都属于这一类。
+ *
+ * 1024-49151: Registered Ports（即注册端口）
+ * 它是不可以动态调整的端口段，这些端口没有明确定义服务哪些特定的对象。不同的程序可以根据自己的需要自己定义。
+ *
+ * 49152–65535: Dynamic, private or ephemeral ports（即动态、私有或临时端口号）
+ * 这些端口号是不可以注册的，这一段的端口被用作一些私人的或者定制化的服务，当然也可以用来做动态端口服务。
+ */
+
+void MessageHandler::setDeviceUdpPort(quint16 port)
+{
+    m_deviceUdpPort = port;
+}
+
+void MessageHandler::setHostIpAddress(QString ip)
+{
+    m_localhostIp = ip;
+}
+
+void MessageHandler::addSendingList(DPacket packet)
+{
+    if (m_sendingList.count() >= 1000) {
+        qDebug() << "sending list is full. max = 1000";
+        emit onErrorOccurred_signal(CommunicationBufferFullError, packet.getPacketID());
+        return;
+    } else if (m_sendingList.count() > 1) {
+        qDebug() << "sending list count:" << m_sendingList.count();
+    }
+
+    m_sendingList.append(packet);
+}
+
+void MessageHandler::setTimeoutValue(int ms)
+{
+    if (ms >= 0) {
+        m_TimeoverMs = ms;
+    }
+}
+
+/* Periodic Task timer (interval=0) */
+void MessageHandler::_PeriodicTask_slot()
+{
+    if (!m_isConnected) {
+        qDebug() << "period task can not run in disconnect status.";
+        return;
+    }
+
+    switch (m_currentState) {
+    case IdleState:
+        if (!m_sendingList.isEmpty()) {
+            currentPacket = m_sendingList.takeFirst();
+            m_resendCount = 0;
+            m_currentState = SendingCmdState;
+        }
+        break;
+
+    case SendingCmdState:
+        /* Send data */
+        _SendData(currentPacket.getPacketData());
+
+        m_resendCount++;
+        m_isTimeOver = false;
+        m_TimeOutTimer->start();
+        m_currentState = WaitingCmdAckState;
+        break;
+
+    case WaitingCmdAckState:
+        /* 重发机制 超时机制 */
+        if (receivePacket.isEmpty() == false) {
+            if (receivePacket.getCommondID() == currentPacket.getCommondID()) {
+                m_TimeOutTimer->stop();
+                receivePacket.setPacketID(currentPacket.getPacketID());
+                receivePacket.setPrivate(currentPacket.isPrivate());
+                receivePacket.setDeviceType(currentPacket.getDeviceType());
+
+                emit sendMessages_signal(receivePacket.getMessage());
+
+                receivePacket.clear();
+                currentPacket.clear();
+
+                m_currentState = IdleState;
+            } else {
+                qDebug() << "ack packet id is different.";
+                receivePacket.clear();
+            }
+        } else if (m_isTimeOver == true) {
+            if (m_resendCount >= RESEND_TIMES_MAX) {    //超过n次重发，放弃，报错
+
+                emit onErrorOccurred_signal(CommunicationTimeoutError, currentPacket.getPacketID());
+
+                qDebug() << "sending timeout. packet id:" << currentPacket.getPacketID()
+                         << " cmd:" << currentPacket.getCommondID();
+
+                m_rxBuffer.clear();
+                receivePacket.clear();  
+                m_currentState = IdleState;
+            } else {
+                qDebug() << "超时重发" << m_resendCount;
+                m_currentState = SendingCmdState;
+            }
+        }
+        break;
+    }
+}
+
+/* 发送数据 */
+void MessageHandler::_SendData(QByteArray data)
+{
+    if (isSerialConnection == true) {
+        qDebug().noquote() << "# >>"
+                           << QString("SerialPort:[%1][send]").arg(m_serialPort->portName())
+                           << data.toHex();
+        qint64 byteCount = m_serialPort->write(data);
+        if (byteCount < 0) {
+            qDebug() << "error:SendData error occurred.";
+        }
+    } else {
+        qDebug().noquote() << "# >>"
+                           << QString("UDP:[%1][send]")
+                              .arg(m_localhostIp)
+                           << data.toHex();
+        m_udpSocket->writeDatagram(data, QHostAddress(m_deviceUdpIp), m_deviceUdpPort);
+    }
+}
+
+/* 收到串口消息-入口 */
+void MessageHandler::onSerialReadyRead_slot()
+{
+    QByteArray newdata = m_serialPort->readAll();
+    qDebug().noquote() << "# <<"
+                       << QString("SerialPort:[%1][receive]").arg(m_serialPort->portName())
+                       << newdata.toHex();
+
+    _HandleNewData(newdata);
+}
+
+void MessageHandler::onReadDatagram_slot()
+{
+    while (m_udpSocket->hasPendingDatagrams()) {
+        QNetworkDatagram datagram = m_udpSocket->receiveDatagram();
+        QByteArray newdata = datagram.data();
+        qDebug().noquote() << "# <<"
+                           << QString("UDP:[%1][receive]").arg(m_deviceUdpIp)
+                           << newdata.toHex();
+
+        _HandleNewData(newdata);
+    }
+}
+
+void MessageHandler::_HandleNewData(QByteArray newdata)
+{
+    bool isCombined = false;
+    if (!m_rxBuffer.isEmpty()) {
+        qDebug() << "append remain data.";
+        isCombined = true;
+    }
+
+    m_rxBuffer.append(newdata);
+
+    if (isCombined) {
+        qDebug() << "# >> [Combined]" << m_rxBuffer.toHex();
+    }
+
+    int res = receivePacket.setPacket(m_rxBuffer);
+
+    if (res == DPacket::PARSE_NO_ERROR) {
+        m_rxBuffer.clear();
+    } else if (res == DPacket::PARSE_HEAD_ERROR or res == DPacket::PARSE_CHECKSUM_ERROR) {
+        m_rxBuffer.clear();
+        receivePacket.clear();
+    } else {
+        receivePacket.clear();
+        qDebug() << "bad data, remain:" << m_rxBuffer.toHex();
+    }
+}
+
+

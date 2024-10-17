@@ -1,0 +1,50 @@
+#include "DM1Protocol.h"
+
+#include <QDataStream>
+#include <QJsonArray>
+#include <QDateTime>
+#include <QTime>
+#include <QtEndian>
+#include <QDebug>
+
+DM1Protocol *DM1Protocol::getInstance()
+{
+    static DM1Protocol *instance = nullptr;
+    if (instance == nullptr) {
+        instance = new DM1Protocol();
+    }
+    return instance;
+}
+
+QJsonObject DM1Protocol::parseParams(PacketPayload &payload)
+{
+    QJsonObject resObj;
+
+    ParseFunction function = m_parseFuncMap.value(payload.p_cmdID);
+
+    if (function) {
+        resObj = (this->*function)(payload.p_ctrl.c_rw, payload.p_params);
+    } else {
+        qDebug() << "No matching parseParams function.";
+    }
+    return resObj;
+}
+
+bool DM1Protocol::setPayload(QString cmd, PacketPayload &payload, QJsonObject params)
+{
+    QByteArray res;
+
+    EncodeFun function = m_encodeFuncMap.value(cmd);
+    if (function) {
+        (this->*function)(payload, params);
+        return true;
+    } else {
+        qDebug() << "No matching encode function with: " << cmd << " params:" << params;
+    }
+    return false;
+}
+
+DM1Protocol::DM1Protocol(QObject *parent) : QObject(parent)
+{
+
+}

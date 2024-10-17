@@ -1,0 +1,347 @@
+#ifndef DM1PROTOCOL_H
+#define DM1PROTOCOL_H
+
+#include <QObject>
+#include <QMap>
+#include <QJsonObject>
+
+#include "DPacket.h"
+
+class DM1Protocol : public QObject
+{
+    Q_OBJECT
+public:
+    typedef QJsonObject (DM1Protocol::*ParseFunction)(quint8, QByteArray);
+    typedef void (DM1Protocol::*EncodeFun)(PacketPayload &, QJsonObject);
+
+    static DM1Protocol *getInstance();
+    const QStringList getCommandList();
+
+    /* parse params of payload for reading */
+    QJsonObject parseParams(PacketPayload &payload);
+
+    /* set payload for sending */
+    bool setPayload(QString cmd, PacketPayload &payload, QJsonObject params);
+
+private:
+    explicit DM1Protocol(QObject *parent = nullptr);
+    Q_DISABLE_COPY(DM1Protocol)
+
+    QMap<QString, EncodeFun> m_encodeFuncMap;
+    QMap<int, ParseFunction> m_parseFuncMap;
+
+    void _packetFunctionInit();
+    void _parseFunctionInit();
+
+    inline QJsonObject addQueueIndexInfo(QJsonObject &resObj, QByteArray &params);
+
+    /* 参考 "Dobot M1-protocol-V2.0" */
+    QJsonObject parseDeviceSN(quint8 rw, QByteArray params);            // 0
+    QJsonObject parseDeviceName(quint8 rw, QByteArray params);          // 1
+    QJsonObject parseDeviceVersion(quint8 rw, QByteArray params);       // 2
+    QJsonObject parseHardwareVersion(quint8 rw, QByteArray params);     // 5
+
+    QJsonObject parsePose(quint8 rw, QByteArray params);                // 10
+    QJsonObject parseResetPose(quint8 rw, QByteArray params);           // 11
+
+    QJsonObject parseAlarmState(quint8 rw, QByteArray params);          // 20
+
+    QJsonObject parseHOMECmd(quint8 rw, QByteArray params);             // 31
+    QJsonObject parseHOMEInitialPos(quint8 rw, QByteArray params);      // 34
+
+    QJsonObject parseHHTTrigMode(quint8 rw, QByteArray params);         // 40
+    QJsonObject parseHHTTrigOutputEnabled(quint8 rw, QByteArray params);// 41
+    QJsonObject parseHHTTrigOutput(quint8 rw, QByteArray params);       // 42
+
+    QJsonObject parseArmOrientation(quint8 rw, QByteArray params);      // 50
+
+    QJsonObject parseEndEffectorParams(quint8 rw, QByteArray params);   // 60
+    QJsonObject parseEndEffectorLaser(quint8 rw, QByteArray params);    // 61
+
+    QJsonObject parseJOGJointParams(quint8 rw, QByteArray params);      // 70
+    QJsonObject parseJOGCoordinateParams(quint8 rw, QByteArray params); // 71
+    QJsonObject parseJOGCommonParams(quint8 rw, QByteArray params);     // 72
+    QJsonObject parseJOGCmd(quint8 rw, QByteArray params);              // 73
+
+    QJsonObject parseInchMode(quint8 rw, QByteArray params);            // 75
+    QJsonObject parseInchParam(quint8 rw, QByteArray params);           // 76
+
+    QJsonObject parsePTPJointParams(quint8 rw, QByteArray params);      // 80
+    QJsonObject parsePTPCoordinateParams(quint8 rw, QByteArray params); // 81
+    QJsonObject parsePTPJumpParams(quint8 rw, QByteArray params);       // 82
+    QJsonObject parsePTPCommonParams(quint8 rw, QByteArray params);     // 83
+    QJsonObject parsePTPCmd(quint8 rw, QByteArray params);              // 84
+
+    QJsonObject parseCPParams(quint8 rw, QByteArray params);            // 90
+    QJsonObject parseCPCmd(quint8 rw, QByteArray params);               // 91
+    QJsonObject parseCPLECmd(quint8 rw, QByteArray params);             // 92
+
+    QJsonObject parseARCParams(quint8 rw, QByteArray params);           // 100
+    QJsonObject parseARCCmd(quint8 rw, QByteArray params);              // 101
+    QJsonObject parseCircleCmd(quint8 rw, QByteArray params);           // 102
+
+    QJsonObject parseWAITCmd(quint8 rw, QByteArray params);             // 110
+
+    QJsonObject parseTRIGCmd(quint8 rw, QByteArray params);             // 120
+
+    QJsonObject parseIODO(quint8 rw, QByteArray params);                // 131
+    QJsonObject parseIODI(quint8 rw, QByteArray params);                // 133
+    QJsonObject parseIOADC(quint8 rw, QByteArray params);               // 134
+
+    QJsonObject parseLanPortConfig(quint8 rw, QByteArray params);       // 167
+
+    QJsonObject parseSafeModeEnabled(quint8 rw, QByteArray params);     // 200
+    QJsonObject parseCollisionThreshold(quint8 rw, QByteArray params);  // 201
+    QJsonObject parseLoadParams(quint8 rw, QByteArray params);          // 203
+    QJsonObject parseSafeStrategy(quint8 rw, QByteArray params);        // 208
+    QJsonObject parseSafeGuardMode(quint8 rw, QByteArray params);       // 210
+    QJsonObject parseSafeGuardStatus(quint8 rw, QByteArray params);     // 211
+
+    QJsonObject parseQueuedCmdStart(quint8 rw, QByteArray params);          // 240
+    QJsonObject parseQueuedCmdStop(quint8 rw, QByteArray params);           // 241
+    QJsonObject parseQueuedCmdForceStop(quint8 rw, QByteArray params);      // 242
+    QJsonObject parseQueuedCmdStartDownload(quint8 rw, QByteArray params);  // 243
+    QJsonObject parseQueuedCmdStopDownload(quint8 rw, QByteArray params);   // 244
+    QJsonObject parseQueuedCmdClear(quint8 rw, QByteArray params);          // 245
+    QJsonObject parseQueuedCmdCurrentIndex(quint8 rw, QByteArray params);   // 246
+    QJsonObject parseQueuedCmdLeftSpace(quint8 rw, QByteArray params);      // 247
+
+    QJsonObject parseUserCoordinate(quint8 rw, QByteArray params);      // 250
+    QJsonObject parseToolCoordinate(quint8 rw, QByteArray params);      // 251
+
+    /* send message */
+
+    /* id:0~5 */
+    void encodeSetDeviceSN(PacketPayload &payload, QJsonObject params);             // 0
+    void encodeGetDeviceSN(PacketPayload &payload, QJsonObject params);             // 0
+    void encodeSetDeviceName(PacketPayload &payload, QJsonObject params);           // 1
+    void encodeGetDeviceName(PacketPayload &payload, QJsonObject params);           // 1
+    void encodeGetDeviceVersion(PacketPayload &payload, QJsonObject params);        // 2
+    void encodeGetHardwareVersion(PacketPayload &payload, QJsonObject params);      // 5
+
+    /* id:10~13 */
+    void encodeGetPose(PacketPayload &payload, QJsonObject params);                 // 10
+    void encodeResetPose(PacketPayload &payload, QJsonObject params);               // 11
+
+    /* id:20 */
+    void encodeGetAlarmsState(PacketPayload &payload, QJsonObject params);          // 20
+    void encodeClearAllAlarmsState(PacketPayload &payload, QJsonObject params);     // 20
+
+    /* id:31、34 */
+    void encodeSetHOMECmd(PacketPayload &payload, QJsonObject params);              // 31
+    void encodeSetHOMEInitialPos(PacketPayload &payload, QJsonObject params);       // 34
+
+    /* id:40~42 */
+    void encodeSetHHTTrigMode(PacketPayload &payload, QJsonObject params);          // 40
+    void encodeGetHHTTrigMode(PacketPayload &payload, QJsonObject params);          // 40
+    void encodeSetHHTTrigOutputEnabled(PacketPayload &payload, QJsonObject params); // 41
+    void encodeGetHHTTrigOutputEnabled(PacketPayload &payload, QJsonObject params); // 41
+    void encodeGetHHTTrigOutput(PacketPayload &payload, QJsonObject params);        // 42
+
+    void encodeSetArmOrientation(PacketPayload &payload, QJsonObject params);       // 50
+    void encodeGetArmOrientation(PacketPayload &payload, QJsonObject params);       // 50
+
+    /* id:60~61 */
+    void encodeSetEndEffectorParams(PacketPayload &payload, QJsonObject params);    // 60
+    void encodeGetEndEffectorParams(PacketPayload &payload, QJsonObject params);    // 60
+    void encodeSetEndEffectorLaser(PacketPayload &payload, QJsonObject params);     // 61
+    void encodeGetEndEffectorLaser(PacketPayload &payload, QJsonObject params);     // 61
+
+    /* id:70~76*/
+    void encodeSetJOGJointParams(PacketPayload &payload, QJsonObject params);       // 70
+    void encodeGetJOGJointParams(PacketPayload &payload, QJsonObject params);       // 70
+    void encodeSetJOGCoordinateParams(PacketPayload &payload, QJsonObject params);  // 71
+    void encodeGetJOGCoordinateParams(PacketPayload &payload, QJsonObject params);  // 71
+    void encodeSetJOGCommonParams(PacketPayload &payload, QJsonObject params);      // 72
+    void encodeGetJOGCommonParams(PacketPayload &payload, QJsonObject params);      // 72
+    void encodeSetJOGCmd(PacketPayload &payload, QJsonObject params);               // 73
+    void encodeSetInchMode(PacketPayload &payload, QJsonObject params);             // 75
+    void encodeGetInchMode(PacketPayload &payload, QJsonObject params);             // 75
+    void encodeSetInchParam(PacketPayload &payload, QJsonObject params);            // 76
+    void encodeGetInchParam(PacketPayload &payload, QJsonObject params);            // 76
+
+    /* id:80~89 */
+    void encodeSetPTPJointParams(PacketPayload &payload, QJsonObject params);       // 80
+    void encodeGetPTPJointParams(PacketPayload &payload, QJsonObject params);       // 80
+    void encodeSetPTPCoordinateParams(PacketPayload &payload, QJsonObject params);  // 81
+    void encodeGetPTPCoordinateParams(PacketPayload &payload, QJsonObject params);  // 81
+    void encodeSetPTPJumpParams(PacketPayload &payload, QJsonObject params);        // 82
+    void encodeGetPTPJumpParams(PacketPayload &payload, QJsonObject params);        // 82
+    void encodeSetPTPCommonParams(PacketPayload &payload, QJsonObject params);      // 83
+    void encodeGetPTPCommonParams(PacketPayload &payload, QJsonObject params);      // 83
+    void encodeSetPTPCmd(PacketPayload &payload, QJsonObject params);               // 84
+
+    /* id:90~95 */
+    void encodeSetCPParams(PacketPayload &payload, QJsonObject params);             // 90
+    void encodeGetCPParams(PacketPayload &payload, QJsonObject params);             // 90
+    void encodeSetCPCmd(PacketPayload &payload, QJsonObject params);                // 91
+    void encodeSetCPLECmd(PacketPayload &payload, QJsonObject params);              // 92
+
+    /* id:100~103 */
+    void encodeSetARCParams(PacketPayload &payload, QJsonObject params);            // 100
+    void encodeGetARCParams(PacketPayload &payload, QJsonObject params);            // 100
+    void encodeSetARCCmd(PacketPayload &payload, QJsonObject params);               // 101
+    void encodeSetCircleCmd(PacketPayload &payload, QJsonObject params);            // 102
+
+    /* id:110 */
+    void encodeSetWAITCmd(PacketPayload &payload, QJsonObject params);              // 110
+
+    /* id:120 */
+    void encodeSetTRIGCmd(PacketPayload &payload, QJsonObject params);              // 120
+
+    /* id:130~139 */
+    void encodeSetIODO(PacketPayload &payload, QJsonObject params);                 // 131
+    void encodeGetIODO(PacketPayload &payload, QJsonObject params);                 // 131
+    void encodeGetIODI(PacketPayload &payload, QJsonObject params);                 // 133
+    void encodeGetIOADC(PacketPayload &payload, QJsonObject params);                // 134
+
+    void encodeSetLanPortConfig(PacketPayload &payload, QJsonObject params);        // 167
+    void encodeGetLanPortConfig(PacketPayload &payload, QJsonObject params);        // 167
+
+    /* 200 201 203 208 210 211 */
+    void encodeSetSafeModeEnabled(PacketPayload &payload, QJsonObject params);      // 200
+    void encodeGetSafeModeEnabled(PacketPayload &payload, QJsonObject params);      // 200
+    void encodeSetCollisionThreshold(PacketPayload &payload, QJsonObject params);   // 201
+    void encodeGetCollisionThreshold(PacketPayload &payload, QJsonObject params);   // 201
+    void encodeSetLoadParams(PacketPayload &payload, QJsonObject params);           // 203
+    void encodeGetLoadParams(PacketPayload &payload, QJsonObject params);           // 203
+    void encodeSetSafeStrategy(PacketPayload &payload, QJsonObject params);         // 208
+    void encodeGetSafeStrategy(PacketPayload &payload, QJsonObject params);         // 208
+    void encodeSetSafeGuardMode(PacketPayload &payload, QJsonObject params);        // 210
+    void encodeGetSafeGuardMode(PacketPayload &payload, QJsonObject params);        // 210
+    void encodeGetSafeGuardStatus(PacketPayload &payload, QJsonObject params);      // 211
+
+    /* id:240~247 */
+    void encodeSetQueuedCmdStart(PacketPayload &payload, QJsonObject params);       // 240
+    void encodeSetQueuedCmdStop(PacketPayload &payload, QJsonObject params);        // 241
+    void encodeSetQueuedCmdForceStop(PacketPayload &payload, QJsonObject params);   // 242
+    void encodeSetQueuedCmdStartDownload(PacketPayload &payload, QJsonObject params);//243
+    void encodeSetQueuedCmdStopDownload(PacketPayload &payload, QJsonObject params);// 244
+    void encodeSetQueuedCmdClear(PacketPayload &payload, QJsonObject params);       // 245
+    void encodeGetQueuedCmdCurrentIndex(PacketPayload &payload, QJsonObject params);// 246
+    void encodeGetQueuedCmdLeftSpace(PacketPayload &payload, QJsonObject params);   // 247
+
+    /* 250~251 */
+    void encodeSetUserCoordinate (PacketPayload &payload, QJsonObject params);      // 250
+    void encodeGetUserCoordinate (PacketPayload &payload, QJsonObject params);      // 250
+    void encodeSetToolCoordinate (PacketPayload &payload, QJsonObject params);      // 251
+    void encodeGetToolCoordinate (PacketPayload &payload, QJsonObject params);      // 251
+
+public:
+#pragma pack(push, 1)
+    /* POSE */
+    struct PositionStruct {
+        float x;
+        float y;
+        float z;
+        float r;
+    };
+
+    struct PoseStruct {
+        PositionStruct coord;
+        float jointAngle[4];
+    };
+
+    /* VELOCITY */
+    struct VelocityArrayStruct {
+        float velocity[4];
+        float acceleration[4];
+    };
+
+    struct VelocityRatioStruct {
+        float velocityRatio;
+        float accelerationRatio;
+    };
+
+    /* InchParams */
+    struct InchParamsStruct {
+        float distanceMM;
+        float distanceANG;
+    };
+
+    /* Collision Threshold */
+    struct TorDiffParamsStruct {
+        float torDiffJ1;
+        float torDiffJ2;
+        float torDiffJ3;
+        float torDiffJ4;
+    };
+
+    /* ARC */
+    struct ARCCmdStruct {
+        PositionStruct cirPoint;
+        PositionStruct toPoint;
+    };
+
+    struct ARCParamsStruct {
+        float xyzVelocity;
+        float rVelocity;
+        float xyzAcceleration;
+        float rAcceleration;
+    };
+
+    /* Circle */
+    struct CircleCmdStruct {
+        PositionStruct cirPoint;
+        PositionStruct toPoint;
+        quint32 count;
+    };
+
+    /* CP */
+    struct CPCmdStruct {
+        quint8 cpMode;
+        float x;
+        float y;
+        float z;
+        union {
+            float velocity;
+            float power;
+        };
+    };
+
+    struct CPParamsStruct {
+        float targetAcc;
+        float junctionVel;
+        union {
+            float acc;
+            float period;
+        };
+        quint8 realTimeTrack;
+    };
+
+    /* PTP */
+    struct PTPCmdStruct {
+        quint8 ptpMode;
+        PositionStruct coord;
+    };
+
+    /* PTP */
+    struct PTPCoordinateParamsStruct {
+        float xyzVelocity;
+        float rVelocity;
+        float xyzAcceleration;
+        float rAcceleration;
+    };
+
+    /* TRIG */
+    struct TRIGCmdStruct {
+        quint8 port;
+        quint8 mode;
+        quint8 condition;
+        quint16 threshold;
+    };
+
+    /* LAN */
+    struct LanPortInfoStruct {
+        quint8 status;
+        quint8 isdhcp;
+        quint8 addr[16];
+        quint8 mask[16];
+        quint8 gateway[16];
+        quint8 dns[16];
+    };
+
+#pragma pack(pop)
+};
+
+#endif // DM1PROTOCOL_H

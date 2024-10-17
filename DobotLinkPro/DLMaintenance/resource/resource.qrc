@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>dlmaintenance.qm</file>
+    </qresource>
+</RCC>
